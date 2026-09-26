@@ -5,15 +5,15 @@ import unicodedata
 # 1. ページの設定（ブラウザのタブ名）
 st.set_page_config(page_title="Nagi Archives DB", layout="centered")
 
-# 背景色と、すべての基本文字・ラジオボタンの文字色を強制的に固定するCSS
+# 背景色と、ダークモード時に消えてしまう説明文・ラジオボタンの文字色だけを修正するCSS
 st.markdown(
     """
     <style>
     .stApp {
         background-color: #F4F7FC !important;
     }
-    /* スマホのダークモード等で文字が白くなって消えるのを防ぐため、黒に近い色に固定します */
-    h1, h2, h3, p, span, label, .stMarkdown, .stRadio p {
+    /* スマホのダークモード等で通常文字やラジオボタンの文字が消えるのを防ぐ */
+    .stApp p, .stApp label, .stApp span:not([style*="color"]) {
         color: #111111 !important;
     }
     </style>
@@ -27,7 +27,7 @@ st.markdown(
     <h1 style='text-align: center; margin-bottom: 0px;'>
         <span style='color: #0000cd !important;'>Nagi</span>
         <span style='color: #ff1493 !important;'>Archives</span>
-        <span style='color: #111111 !important;'> DB</span>
+        <span style='color: #000000 !important;'> DB</span>
     </h1>
     """,
     unsafe_allow_html=True
@@ -39,6 +39,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+# 「🎸 全アーカイブ(歌枠)から探す」の文字サイズと色（ダークモード対策）
 st.markdown(
     "<div style='font-size: 22px; font-weight: bold; color: #111111 !important;'>🎸 全アーカイブ(歌枠)から探す</div>",
     unsafe_allow_html=True
