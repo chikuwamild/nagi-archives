@@ -36,6 +36,7 @@ st.markdown(
         text-align: center;
         margin-bottom: 0px;
         font-size: 42px;
+	font-weight: 700;
         white-space: nowrap;
     }
 
