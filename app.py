@@ -12,8 +12,48 @@ st.markdown(
     .stApp {
         background-color: #F4F7FC !important;
     }
-    /* スマホのダークモード等で通常文字やラジオボタンの文字が消えるのを防ぐ */
-    .stApp p, .stApp label, .stApp span:not([style*="color"]) {
+
+    /* 通常の説明文 */
+    .stApp p {
+        color: #111111 !important;
+    }
+
+    /* ラジオボタン */
+    .stApp label {
+        color: #111111 !important;
+    }
+
+    /* タイトル */
+    .nagi-title {
+        text-align: center;
+        margin-bottom: 0px;
+    }
+
+    .nagi {
+        color: #0000cd !important;
+    }
+
+    .archives {
+        color: #ff1493 !important;
+    }
+
+    .db {
+        color: #000000 !important;
+    }
+
+    /* 更新日 */
+    .update-date {
+        text-align: center;
+        color: #666666 !important;
+        font-size: 12px;
+        margin-top: -8px;
+        margin-bottom: 5px;
+    }
+
+    /* サブタイトル */
+    .archive-title {
+        font-size: 22px;
+        font-weight: bold;
         color: #111111 !important;
     }
     </style>
@@ -24,10 +64,10 @@ st.markdown(
 # 2. 画面トップのタイトル構成
 st.markdown(
     """
-    <h1 style='text-align: center; margin-bottom: 0px;'>
-        <span style='color: #0000cd !important;'>Nagi</span>
-        <span style='color: #ff1493 !important;'>Archives</span>
-        <span style='color: #000000 !important;'> DB</span>
+    <h1 class='nagi-title'>
+        <span class='nagi'>Nagi</span>
+        <span class='archives'>Archives</span>
+        <span class='db'> DB</span>
     </h1>
     """,
     unsafe_allow_html=True
@@ -35,17 +75,16 @@ st.markdown(
 
 # 更新日
 st.markdown(
-    "<div style='text-align: center; color: #666666 !important; font-size: 12px; margin-top: -8px; margin-bottom: 5px;'> ※非公式だよ※ 2026年9月27日更新</div>",
+    "<div class='update-date'>※非公式だよ※ 2026年9月27日更新</div>",
     unsafe_allow_html=True
 )
-
-# 「🎸 全アーカイブ(歌枠)から探す」の文字サイズと色（ダークモード対策）
+# 「🎸 全アーカイブ(歌枠)から探す」の文字サイズと色
 st.markdown(
-    "<div style='font-size: 22px; font-weight: bold; color: #111111 !important;'>🎸 全アーカイブ(歌枠)から探す</div>",
+    "<div class='archive-title'>🎸 全アーカイブ(歌枠)から探す</div>",
     unsafe_allow_html=True
 )
-st.write("検索方法を選択して、検索ワードを入力してください。")
 
+st.write("検索方法を選択して、検索ワードを入力してください。")
 
 # 文字を標準化する関数（検索漏れを防ぐ）
 def normalize_text(text):
