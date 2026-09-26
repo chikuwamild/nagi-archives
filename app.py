@@ -90,11 +90,11 @@ st.markdown(
 # 2. 画面トップのタイトル構成
 st.markdown(
     """
-    <h1 class='nagi-title'>
+    <div class='nagi-title'>
         <span class='nagi'>Nagi</span>
         <span class='archives'>Archives</span>
         <span class='db'> DB</span>
-    </h1>
+    </div>
     """,
     unsafe_allow_html=True
 )
