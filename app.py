@@ -5,12 +5,16 @@ import unicodedata
 # 1. ページの設定（ブラウザのタブ名）
 st.set_page_config(page_title="Nagi Archives DB", layout="centered")
 
-# 背景色
+# 背景色と、すべての基本文字・ラジオボタンの文字色を強制的に固定するCSS
 st.markdown(
     """
     <style>
     .stApp {
-        background-color: #F4F7FC;
+        background-color: #F4F7FC !important;
+    }
+    /* スマホのダークモード等で文字が白くなって消えるのを防ぐため、黒に近い色に固定します */
+    h1, h2, h3, p, span, label, .stMarkdown, .stRadio p {
+        color: #111111 !important;
     }
     </style>
     """,
@@ -21,9 +25,9 @@ st.markdown(
 st.markdown(
     """
     <h1 style='text-align: center; margin-bottom: 0px;'>
-        <span style='color: #0000cd;'>Nagi</span>
-        <span style='color: #ff1493;'>Archives</span>
-        <span style='color: #000000;'> DB</span>
+        <span style='color: #0000cd !important;'>Nagi</span>
+        <span style='color: #ff1493 !important;'>Archives</span>
+        <span style='color: #111111 !important;'> DB</span>
     </h1>
     """,
     unsafe_allow_html=True
@@ -31,12 +35,12 @@ st.markdown(
 
 # 更新日
 st.markdown(
-    "<div style='text-align: center; color: #888888; font-size: 12px; margin-top: -8px; margin-bottom: 5px;'> ※非公式だよ※ 2026年9月27日更新</div>",
+    "<div style='text-align: center; color: #666666 !important; font-size: 12px; margin-top: -8px; margin-bottom: 5px;'> ※非公式だよ※ 2026年9月27日更新</div>",
     unsafe_allow_html=True
 )
 
 st.markdown(
-    "<div style='font-size: 22px; font-weight: bold;'>🎸 全アーカイブ(歌枠)から探す</div>",
+    "<div style='font-size: 22px; font-weight: bold; color: #111111 !important;'>🎸 全アーカイブ(歌枠)から探す</div>",
     unsafe_allow_html=True
 )
 st.write("検索方法を選択して、検索ワードを入力してください。")
