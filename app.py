@@ -5,7 +5,7 @@ import unicodedata
 # 1. ページの設定（ブラウザのタブ名）
 st.set_page_config(page_title="Nagi Archives DB", layout="centered")
 
-# 背景色と、ダークモード時に消えてしまう説明文・ラジオボタンの文字色だけを修正するCSS
+# 背景色と文字色を設定するCSS
 st.markdown(
     """
     <style>
@@ -27,6 +27,7 @@ st.markdown(
     .nagi-title {
         text-align: center;
         margin-bottom: 0px;
+        font-size: 42px;
     }
 
     .nagi {
@@ -50,11 +51,25 @@ st.markdown(
         margin-bottom: 5px;
     }
 
-    /* サブタイトル */
+    /* 全アーカイブ */
     .archive-title {
         font-size: 22px;
         font-weight: bold;
         color: #111111 !important;
+    }
+
+    /* スマホ表示 */
+    @media (max-width: 600px) {
+
+        /* Nagi Archives DB */
+        .nagi-title {
+            font-size: 30px;
+        }
+
+        /* 全アーカイブ */
+        .archive-title {
+            font-size: 18px;
+        }
     }
     </style>
     """,
@@ -78,13 +93,15 @@ st.markdown(
     "<div class='update-date'>※非公式だよ※ 2026年9月27日更新</div>",
     unsafe_allow_html=True
 )
-# 「🎸 全アーカイブ(歌枠)から探す」の文字サイズと色
+
+# 「🎸 全アーカイブ(歌枠)から探す」
 st.markdown(
     "<div class='archive-title'>🎸 全アーカイブ(歌枠)から探す</div>",
     unsafe_allow_html=True
 )
 
 st.write("検索方法を選択して、検索ワードを入力してください。")
+
 
 # 文字を標準化する関数（検索漏れを防ぐ）
 def normalize_text(text):
