@@ -1,0 +1,151 @@
+import streamlit as st
+import pandas as pd
+import unicodedata
+
+# 1. ページの設定（ブラウザのタブ名）
+st.set_page_config(page_title="Nagi Archives DB", layout="centered")
+
+# 背景色
+st.markdown(
+    """
+    <style>
+    .stApp {
+        background-color: #F4F7FC;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# 2. 画面トップのタイトル構成
+st.markdown(
+    """
+    <h1 style='text-align: center; margin-bottom: 0px;'>
+        <span style='color: #0000cd;'>Nagi</span>
+        <span style='color: #ff1493;'>Archives</span>
+        <span style='color: #000000;'> DB</span>
+    </h1>
+    """,
+    unsafe_allow_html=True
+)
+
+# 更新日
+st.markdown(
+    "<div style='text-align: center; color: #888888; font-size: 12px; margin-top: -8px; margin-bottom: 5px;'> ※非公式だよ※ 2026年9月27日更新</div>",
+    unsafe_allow_html=True
+)
+
+st.markdown(
+    "<div style='font-size: 22px; font-weight: bold;'>🎸 全アーカイブ(歌枠)から探す</div>",
+    unsafe_allow_html=True
+)
+st.write("検索方法を選択して、検索ワードを入力してください。")
+
+
+# 文字を標準化する関数（検索漏れを防ぐ）
+def normalize_text(text):
+    if pd.isna(text):
+        return ""
+    text = unicodedata.normalize('NFKC', str(text)).lower()
+    return "".join(text.split())
+
+
+# Excelデータの読み込み
+@st.cache_data
+def load_data():
+    try:
+        df = pd.read_excel("songs_data.xlsx")
+        df.columns = df.columns.str.strip()
+        return df
+    except Exception as e:
+        st.error(f"Excelの読み込み失敗: {e}")
+        return None
+
+
+df = load_data()
+
+
+if df is not None:
+
+    # 3. 検索方法を選択
+    search_type = st.radio(
+        "🔍 検索方法",
+        ["曲情報から検索", "配信タイトルから検索"],
+        horizontal=True
+    )
+
+    # 4. 検索対象の列を設定
+    if search_type == "曲情報から検索":
+        target_columns = ["曲名", "アーティスト名", "年", "ジャンル"]
+        placeholder = "例：光、イザナギ、2026、リレー など"
+    else:
+        target_columns = ["配信タイトル"]
+        placeholder = "例：叫びはまだ名を持たない、Rock Mode など"
+
+    # 5. 検索フォーム
+    with st.form("search_form"):
+        search_word = st.text_input(
+            "🎵 検索ワードを入力してください(部分検索可)",
+            placeholder=placeholder
+        )
+
+        search_button = st.form_submit_button(
+            "🔍 検索"
+        )
+
+    # 6. 検索ボタンを押したときだけ検索
+    if search_button:
+
+        search_clean = normalize_text(search_word)
+
+        if search_clean:
+
+            # Excelに指定の列が存在するかチェック
+            missing_cols = [
+                col for col in target_columns
+                if col not in df.columns
+            ]
+
+            if not missing_cols:
+
+                # 指定された列のどこかに検索ワードが含まれているか判定
+                mask = pd.Series(False, index=df.index)
+
+                for col in target_columns:
+                    col_clean = df[col].astype(str).apply(normalize_text)
+
+                    mask = mask | col_clean.str.contains(
+                        search_clean,
+                        na=False
+                    )
+
+                results = df[mask]
+
+                # 検索結果の表示
+                if not results.empty:
+                    st.success(
+                        f"🔥 {len(results)} 件の履歴が見つかりました！"
+                    )
+
+                    st.dataframe(
+                        results,
+                        use_container_width=True
+                    )
+
+                else:
+                    st.warning(
+                        "該当する履歴が見つかりませんでした。"
+                    )
+
+            else:
+                st.error(
+                    f"Excelファイルの中に以下の列が見つかりません: {missing_cols}"
+                )
+
+                st.write(
+                    "💡 現在のExcelの列名:",
+                    list(df.columns)
+                )
+
+        else:
+            st.warning("検索ワードを入力してください。")
