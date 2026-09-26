@@ -63,7 +63,7 @@ st.markdown(
 
     /* 全アーカイブ */
     .archive-title {
-        font-size: 22px;
+        font-size: 20px;
         font-weight: bold;
         color: #111111 !important;
     }
