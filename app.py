@@ -63,7 +63,7 @@ st.markdown(
 
         /* Nagi Archives DB */
         .nagi-title {
-            font-size: 30px;
+            font-size: 22px;
         }
 
         /* 全アーカイブ */
