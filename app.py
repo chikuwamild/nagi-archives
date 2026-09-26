@@ -72,8 +72,8 @@ st.markdown(
 
         /* Nagi Archives DB */
         .nagi-title {
-            font-size: 22px !important;
-            white-space: nowrap;
+            font-size: 30px !important;
+            white-space: normal;
         }
 
         /* 全アーカイブ */
