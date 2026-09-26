@@ -5,6 +5,7 @@ import unicodedata
 # 1. ページの設定（ブラウザのタブ名）
 st.set_page_config(page_title="Nagi Archives DB", layout="centered")
 
+
 # 背景色と文字色を設定するCSS
 st.markdown(
     """
@@ -23,11 +24,19 @@ st.markdown(
         color: #111111 !important;
     }
 
+    /* 検索ボタン */
+    .stApp button[kind="secondaryFormSubmit"] {
+        color: #111111 !important;
+        background-color: #FFFFFF !important;
+        border: 1px solid #CCCCCC !important;
+    }
+
     /* タイトル */
     .nagi-title {
         text-align: center;
         margin-bottom: 0px;
         font-size: 42px;
+        white-space: nowrap;
     }
 
     .nagi {
@@ -63,18 +72,20 @@ st.markdown(
 
         /* Nagi Archives DB */
         .nagi-title {
-            font-size: 22px;
+            font-size: 22px !important;
+            white-space: nowrap;
         }
 
         /* 全アーカイブ */
         .archive-title {
-            font-size: 18px;
+            font-size: 18px !important;
         }
     }
     </style>
     """,
     unsafe_allow_html=True
 )
+
 
 # 2. 画面トップのタイトル構成
 st.markdown(
@@ -88,11 +99,13 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+
 # 更新日
 st.markdown(
     "<div class='update-date'>※非公式だよ※ 2026年9月27日更新</div>",
     unsafe_allow_html=True
 )
+
 
 # 「🎸 全アーカイブ(歌枠)から探す」
 st.markdown(
@@ -135,6 +148,7 @@ if df is not None:
         horizontal=True
     )
 
+
     # 4. 検索対象の列を設定
     if search_type == "曲情報から検索":
         target_columns = ["曲名", "アーティスト名", "年", "ジャンル"]
@@ -143,8 +157,10 @@ if df is not None:
         target_columns = ["配信タイトル"]
         placeholder = "例：叫びはまだ名を持たない、Rock Mode など"
 
+
     # 5. 検索フォーム
     with st.form("search_form"):
+
         search_word = st.text_input(
             "🎵 検索ワードを入力してください(部分検索可)",
             placeholder=placeholder
@@ -153,6 +169,7 @@ if df is not None:
         search_button = st.form_submit_button(
             "🔍 検索"
         )
+
 
     # 6. 検索ボタンを押したときだけ検索
     if search_button:
@@ -173,6 +190,7 @@ if df is not None:
                 mask = pd.Series(False, index=df.index)
 
                 for col in target_columns:
+
                     col_clean = df[col].astype(str).apply(normalize_text)
 
                     mask = mask | col_clean.str.contains(
@@ -182,8 +200,10 @@ if df is not None:
 
                 results = df[mask]
 
+
                 # 検索結果の表示
                 if not results.empty:
+
                     st.success(
                         f"🔥 {len(results)} 件の履歴が見つかりました！"
                     )
@@ -194,11 +214,14 @@ if df is not None:
                     )
 
                 else:
+
                     st.warning(
                         "該当する履歴が見つかりませんでした。"
                     )
 
+
             else:
+
                 st.error(
                     f"Excelファイルの中に以下の列が見つかりません: {missing_cols}"
                 )
@@ -208,5 +231,7 @@ if df is not None:
                     list(df.columns)
                 )
 
+
         else:
+
             st.warning("検索ワードを入力してください。")
