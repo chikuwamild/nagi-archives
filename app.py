@@ -23,7 +23,7 @@ st.markdown(
     }
 
     .stApp {
-        background-color: #0E0F12 !important;
+        background-color: #0B0D12 !important;
         color: #E0E0E0 !important;
     }
 
@@ -43,14 +43,16 @@ st.markdown(
         padding-bottom: 5px;
     }
 
+    /* 深みブルー */
     .nagi {
-        color: #00F0FF !important;
-        text-shadow: 0 0 12px rgba(0, 240, 255, 0.7), 0 0 25px rgba(0, 240, 255, 0.4);
+        color: #2563EB !important;
+        text-shadow: 0 0 12px rgba(37, 99, 235, 0.8), 0 0 25px rgba(37, 99, 235, 0.4);
     }
 
+    /* ディープピンク */
     .archives {
-        color: #FF0055 !important;
-        text-shadow: 0 0 12px rgba(255, 0, 85, 0.7), 0 0 25px rgba(255, 0, 85, 0.4);
+        color: #FF1493 !important;
+        text-shadow: 0 0 12px rgba(255, 20, 147, 0.8), 0 0 25px rgba(255, 20, 147, 0.4);
     }
 
     .db {
@@ -61,7 +63,7 @@ st.markdown(
     /* 更新日 */
     .update-date {
         text-align: center;
-        color: #888888 !important;
+        color: #8892B0 !important;
         font-size: 13px;
         margin-top: -5px;
         margin-bottom: 35px;
@@ -73,8 +75,8 @@ st.markdown(
         font-size: 22px;
         font-weight: 900;
         color: #FFFFFF !important;
-        border-bottom: 2px solid #FF0055;
-        box-shadow: 0 2px 10px rgba(255, 0, 85, 0.3);
+        border-bottom: 3px solid;
+        border-image: linear-gradient(90deg, #1E40AF 0%, #FF1493 100%) 1;
         padding-bottom: 8px;
         margin-bottom: 25px;
         letter-spacing: 1px;
@@ -82,30 +84,41 @@ st.markdown(
 
     /* ラジオボタン */
     div[role="radiogroup"] label {
-        background-color: #1A1C23 !important;
+        background-color: #131722 !important;
         padding: 8px 16px !important;
         border-radius: 4px !important;
-        border: 1px solid #333644 !important;
+        border: 1px solid #2A324B !important;
         margin-right: 8px !important;
         transition: all 0.2s ease !important;
     }
 
     /* 入力フォーム */
     .stTextInput input {
-        background-color: #161820 !important;
+        background-color: #131722 !important;
         color: #FFFFFF !important;
         border-radius: 4px !important;
-        border: 1px solid #333644 !important;
+        border: 1px solid #2A324B !important;
         padding: 12px 15px !important;
     }
+    
+    /* 検索プレースホルダー */
+    .stTextInput input::placeholder {
+        color: #94A3B8 !important;
+        opacity: 1 !important;
+    }
+    .stTextInput input::-webkit-input-placeholder {
+        color: #94A3B8 !important;
+        opacity: 1 !important;
+    }
+
     .stTextInput input:focus {
-        border-color: #FF0055 !important;
-        box-shadow: 0 0 10px rgba(255, 0, 85, 0.5) !important;
+        border-color: #FF1493 !important;
+        box-shadow: 0 0 10px rgba(255, 20, 147, 0.5) !important;
     }
 
     /* 検索ボタン */
     button[kind="secondaryFormSubmit"] {
-        background: linear-gradient(135deg, #FF0055 0%, #D80044 100%) !important;
+        background: linear-gradient(135deg, #1E3A8A 0%, #FF1493 100%) !important;
         color: #FFFFFF !important;
         border: none !important;
         border-radius: 4px !important;
@@ -114,7 +127,7 @@ st.markdown(
         font-size: 16px !important;
         letter-spacing: 2px !important;
         transition: all 0.25s ease-in-out !important;
-        box-shadow: 0 0 15px rgba(255, 0, 85, 0.4) !important;
+        box-shadow: 0 0 15px rgba(255, 20, 147, 0.3) !important;
         display: block;
         margin: 0 auto;
         text-transform: uppercase;
@@ -122,13 +135,13 @@ st.markdown(
 
     button[kind="secondaryFormSubmit"]:hover {
         transform: scale(1.03) !important;
-        box-shadow: 0 0 25px rgba(255, 0, 85, 0.8), 0 0 10px rgba(0, 240, 255, 0.5) !important;
+        box-shadow: 0 0 25px rgba(255, 20, 147, 0.7), 0 0 12px rgba(37, 99, 235, 0.6) !important;
         cursor: pointer;
     }
 
     /* 区切り線 */
     hr {
-        border-color: #2A2D3A !important;
+        border-color: #2A324B !important;
     }
 
     /* スマホ表示のレスポンシブ調整 */
