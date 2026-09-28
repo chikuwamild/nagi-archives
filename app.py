@@ -10,38 +10,52 @@ st.markdown(
     """
     <style>
     /* Google Fontsからフォントをインポート */
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Anton&family=Noto+Sans+JP:wght@400;700;900&display=swap');
 
     /* Streamlit標準のメニューバー・ヘッダー・フッターを非表示化 */
     #MainMenu { visibility: hidden; }
     footer { visibility: hidden; }
     header { visibility: hidden; }
 
-    /* 全体のフォントを適用 */
+    /* 全体のフォントと背景色 */
     html, body, [class*="css"] {
         font-family: 'Noto Sans JP', sans-serif !important;
     }
 
-    /* 背景色をクリーンな薄いグレーに */
     .stApp {
-        background-color: #FAFAFA !important;
+        background-color: #0E0F12 !important;
+        color: #E0E0E0 !important;
     }
 
-    p, label {
-        color: #333333 !important;
+    /* ラベルや通常テキスト */
+    p, label, .stMarkdown {
+        color: #E0E0E0 !important;
     }
 
-    /* タイトル（グラデーションテキスト） */
+    /* タイトル */
     .nagi-title {
+        font-family: 'Anton', 'Noto Sans JP', sans-serif !important;
         text-align: center;
         margin-bottom: 0px;
-        font-size: 48px;
-        font-weight: 900;
-        letter-spacing: 2px;
-        background: linear-gradient(90deg, #2193b0 0%, #6dd5ed 40%, #ff758c 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+        font-size: 56px;
+        letter-spacing: 3px;
+        text-transform: uppercase;
         padding-bottom: 5px;
+    }
+
+    .nagi {
+        color: #00F0FF !important;
+        text-shadow: 0 0 12px rgba(0, 240, 255, 0.7), 0 0 25px rgba(0, 240, 255, 0.4);
+    }
+
+    .archives {
+        color: #FF0055 !important;
+        text-shadow: 0 0 12px rgba(255, 0, 85, 0.7), 0 0 25px rgba(255, 0, 85, 0.4);
+    }
+
+    .db {
+        color: #FFFFFF !important;
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
     }
 
     /* 更新日 */
@@ -50,56 +64,77 @@ st.markdown(
         color: #888888 !important;
         font-size: 13px;
         margin-top: -5px;
-        margin-bottom: 40px;
-        letter-spacing: 1px;
+        margin-bottom: 35px;
+        letter-spacing: 1.5px;
     }
 
     /* セクションタイトル */
     .archive-title {
         font-size: 22px;
-        font-weight: 700;
-        color: #2C3E50 !important;
-        border-bottom: 2px solid #EAEAEA;
-        padding-bottom: 10px;
-        margin-bottom: 20px;
+        font-weight: 900;
+        color: #FFFFFF !important;
+        border-bottom: 2px solid #FF0055;
+        box-shadow: 0 2px 10px rgba(255, 0, 85, 0.3);
+        padding-bottom: 8px;
+        margin-bottom: 25px;
+        letter-spacing: 1px;
     }
 
-    /* 入力フォームのスタイル */
+    /* ラジオボタン */
+    div[role="radiogroup"] label {
+        background-color: #1A1C23 !important;
+        padding: 8px 16px !important;
+        border-radius: 4px !important;
+        border: 1px solid #333644 !important;
+        margin-right: 8px !important;
+        transition: all 0.2s ease !important;
+    }
+
+    /* 入力フォーム */
     .stTextInput input {
-        border-radius: 8px !important;
-        border: 1px solid #D1D5DB !important;
-        padding: 10px 15px !important;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.02) !important;
+        background-color: #161820 !important;
+        color: #FFFFFF !important;
+        border-radius: 4px !important;
+        border: 1px solid #333644 !important;
+        padding: 12px 15px !important;
     }
     .stTextInput input:focus {
-        border-color: #2193b0 !important;
-        box-shadow: 0 0 0 2px rgba(33, 147, 176, 0.2) !important;
+        border-color: #FF0055 !important;
+        box-shadow: 0 0 10px rgba(255, 0, 85, 0.5) !important;
     }
 
-    /* 検索ボタンのカスタマイズ（グラデーション＋ホバーアニメーション） */
+    /* 検索ボタン */
     button[kind="secondaryFormSubmit"] {
-        background: linear-gradient(90deg, #2193b0 0%, #ff758c 100%) !important;
-        color: white !important;
+        background: linear-gradient(135deg, #FF0055 0%, #D80044 100%) !important;
+        color: #FFFFFF !important;
         border: none !important;
-        border-radius: 25px !important;
-        padding: 8px 30px !important;
-        font-weight: bold !important;
-        transition: all 0.3s ease !important;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.15) !important;
+        border-radius: 4px !important;
+        padding: 10px 40px !important;
+        font-weight: 900 !important;
+        font-size: 16px !important;
+        letter-spacing: 2px !important;
+        transition: all 0.25s ease-in-out !important;
+        box-shadow: 0 0 15px rgba(255, 0, 85, 0.4) !important;
         display: block;
         margin: 0 auto;
+        text-transform: uppercase;
     }
 
     button[kind="secondaryFormSubmit"]:hover {
-        transform: translateY(-3px) !important;
-        box-shadow: 0 6px 15px rgba(0,0,0,0.2) !important;
-        opacity: 0.95;
+        transform: scale(1.03) !important;
+        box-shadow: 0 0 25px rgba(255, 0, 85, 0.8), 0 0 10px rgba(0, 240, 255, 0.5) !important;
+        cursor: pointer;
+    }
+
+    /* 区切り線 */
+    hr {
+        border-color: #2A2D3A !important;
     }
 
     /* スマホ表示のレスポンシブ調整 */
     @media (max-width: 600px) {
         .nagi-title {
-            font-size: 32px !important;
+            font-size: 38px !important;
         }
         .archive-title {
             font-size: 18px !important;
@@ -114,7 +149,9 @@ st.markdown(
 st.markdown(
     """
     <div class='nagi-title'>
-        Nagi Archives DB
+        <span class='nagi'>Nagi</span>
+        <span class='archives'>Archives</span>
+        <span class='db'>DB</span>
     </div>
     """,
     unsafe_allow_html=True
@@ -122,7 +159,7 @@ st.markdown(
 
 # 更新日
 st.markdown(
-    "<div class='update-date'>※非公式だよ※<br>2026年9月27日更新</div>",
+    "<div class='update-date'>※非公式だよ※<br>2026年9月29日更新</div>",
     unsafe_allow_html=True
 )
 
@@ -182,7 +219,7 @@ if df is not None:
         
         st.markdown("<br>", unsafe_allow_html=True)
         
-        search_button = st.form_submit_button("🔍 検索")
+        search_button = st.form_submit_button("🔍 SEARCH")
 
     # 7. 検索ボタンを押したときだけ検索
     if search_button:
