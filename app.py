@@ -19,7 +19,7 @@ st.markdown(
 
     /* 画面上部・周囲の余白を小さくして上に詰める */
     .main .block-container {
-        padding-top: 1.5rem !important;
+        padding-top: 1.0rem !important;
         padding-bottom: 3rem !important;
     }
 
