@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import unicodedata
 
-# 1. ページの設定
+# 1. ページの設定（ブラウザのタブ名とアイコン）
 st.set_page_config(page_title="Nagi Archives DB", page_icon="🎸", layout="centered")
 
 # 2. CSSの設定
@@ -12,15 +12,20 @@ st.markdown(
     /* フォントをインポート */
     @import url('https://fonts.googleapis.com/css2?family=Anton&family=Noto+Sans+JP:wght@400;700;900&display=swap');
 
-    /* 標準のメニューバー・ヘッダー・フッターを非表示化 */
+    /* 上部スペースを詰める */
+    header[data-testid="stHeader"], header {
+        display: none !important;
+        height: 0px !important;
+    }
+
     #MainMenu { visibility: hidden; }
     footer { visibility: hidden; }
-    header { visibility: hidden; }
 
-    /* 画面上部・周囲の余白を小さくして上に詰める */
-    .main .block-container {
-        padding-top: 1.0rem !important;
+    /* 画面上部の不要な余白・マージンを完全ゼロ化 */
+    .main .block-container, [data-testid="stMainBlockContainer"] {
+        padding-top: 0rem !important;
         padding-bottom: 3rem !important;
+        margin-top: 0rem !important;
     }
 
     /* 全体のフォントと背景色 */
@@ -42,11 +47,13 @@ st.markdown(
     .nagi-title {
         font-family: 'Anton', 'Noto Sans JP', sans-serif !important;
         text-align: center;
-        margin-bottom: 0px;
+        margin-top: 0px !important;
+        margin-bottom: 0px !important;
+        padding-top: 0px !important;
+        padding-bottom: 5px !important;
         font-size: 56px;
         letter-spacing: 3px;
         text-transform: uppercase;
-        padding-bottom: 5px;
     }
 
     /* 紺色 */
@@ -152,8 +159,8 @@ st.markdown(
 
     /* スマホ表示のレスポンシブ調整 */
     @media (max-width: 600px) {
-        .main .block-container {
-            padding-top: 1rem !important;
+        .main .block-container, [data-testid="stMainBlockContainer"] {
+            padding-top: 0rem !important;
         }
         .nagi-title {
             font-size: 38px !important;
@@ -293,7 +300,7 @@ if df is not None:
                 else:
                     st.warning("該当する履歴が見つかりませんでした。")
             else:
-                st.error(f"Excelファイルの中に以下の列が見つかりません: {missing_cols}")
-                st.write("💡 現在のExcelの列名:", list(df.columns))
+                st.error(f"データの中に以下の列が見つかりません: {missing_cols}")
+                st.write("💡 現在の列名:", list(df.columns))
         else:
             st.warning("検索ワードを入力してください。")
