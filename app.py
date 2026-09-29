@@ -43,7 +43,7 @@ st.markdown(
         padding-bottom: 5px;
     }
 
-    /* 深みブルー */
+    /* ネイビー */
     .nagi {
         color: #2563EB !important;
         text-shadow: 0 0 12px rgba(37, 99, 235, 0.8), 0 0 25px rgba(37, 99, 235, 0.4);
@@ -70,7 +70,7 @@ st.markdown(
         letter-spacing: 1.5px;
     }
 
-    /* セクションタイトル */
+    /* セクションタイトル（下線） */
     .archive-title {
         font-size: 22px;
         font-weight: 900;
@@ -82,7 +82,7 @@ st.markdown(
         letter-spacing: 1px;
     }
 
-    /* ラジオボタン */
+    /* ラジオボタンの見た目調整 */
     div[role="radiogroup"] label {
         background-color: #131722 !important;
         padding: 8px 16px !important;
@@ -101,7 +101,7 @@ st.markdown(
         padding: 12px 15px !important;
     }
     
-    /* 検索プレースホルダー */
+    /* 検索プレースホルダーの視認性向上 */
     .stTextInput input::placeholder {
         color: #94A3B8 !important;
         opacity: 1 !important;
@@ -172,7 +172,7 @@ st.markdown(
 
 # 更新日
 st.markdown(
-    "<div class='update-date'>※非公式だよ※<br>2026年9月29日更新</div>",
+    "<div class='update-date'>※非公式だよ※<br>2026年9月27日更新</div>",
     unsafe_allow_html=True
 )
 
@@ -257,7 +257,24 @@ if df is not None:
                 
                 if not results.empty:
                     st.success(f"🔥 {len(results)} 件の履歴が見つかりました！")
-                    st.dataframe(results, use_container_width=True)
+                    
+                    # URL・リンクが含まれる列を判定して設定
+                    column_config = {}
+                    for col in results.columns:
+                        col_lower = str(col).lower()
+                        if "url" in col_lower or "リンク" in col_lower or "link" in col_lower:
+                            column_config[col] = st.column_config.LinkColumn(
+                                col,
+                                display_text="🔗 視聴する"  # クリック文字（URLそのまま表示したい場合は display_text=None にする）
+                            )
+
+                    # テーブル表示
+                    st.dataframe(
+                        results,
+                        column_config=column_config,
+                        use_container_width=True,
+                        hide_index=True  # 左端の行番号(0, 1, 2...)を非表示
+                    )
                 else:
                     st.warning("該当する履歴が見つかりませんでした。")
             else:
