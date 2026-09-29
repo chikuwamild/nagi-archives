@@ -9,10 +9,10 @@ st.set_page_config(page_title="Nagi Archives DB", page_icon="🎸", layout="cent
 st.markdown(
     """
     <style>
-    /* Google Fontsからフォントをインポート */
+    /* フォントをインポート */
     @import url('https://fonts.googleapis.com/css2?family=Anton&family=Noto+Sans+JP:wght@400;700;900&display=swap');
 
-    /* Streamlit標準のメニューバー・ヘッダー・フッターを非表示化 */
+    /* メニューバー・ヘッダー・フッターを非表示化 */
     #MainMenu { visibility: hidden; }
     footer { visibility: hidden; }
     header { visibility: hidden; }
@@ -43,13 +43,13 @@ st.markdown(
         padding-bottom: 5px;
     }
 
-    /* ネイビー */
+    /* 紺色 */
     .nagi {
         color: #2563EB !important;
         text-shadow: 0 0 12px rgba(37, 99, 235, 0.8), 0 0 25px rgba(37, 99, 235, 0.4);
     }
 
-    /* ディープピンク */
+    /* 濃いピンク */
     .archives {
         color: #FF1493 !important;
         text-shadow: 0 0 12px rgba(255, 20, 147, 0.8), 0 0 25px rgba(255, 20, 147, 0.4);
@@ -172,7 +172,7 @@ st.markdown(
 
 # 更新日
 st.markdown(
-    "<div class='update-date'>※非公式だよ※<br>2026年9月27日更新</div>",
+    "<div class='update-date'>※非公式だよ※<br>2026年9月29日更新</div>",
     unsafe_allow_html=True
 )
 
@@ -192,7 +192,7 @@ def normalize_text(text):
     text = unicodedata.normalize('NFKC', str(text)).lower()
     return "".join(text.split())
 
-# Excelデータの読み込み
+# データの読み込み
 @st.cache_data
 def load_data():
     try:
@@ -239,7 +239,7 @@ if df is not None:
         search_clean = normalize_text(search_word)
 
         if search_clean:
-            # Excelに指定の列が存在するかチェック
+            # 指定の列が存在するかチェック
             missing_cols = [col for col in target_columns if col not in df.columns]
 
             if not missing_cols:
@@ -257,23 +257,27 @@ if df is not None:
                 
                 if not results.empty:
                     st.success(f"🔥 {len(results)} 件の履歴が見つかりました！")
-                    
-                    # URL・リンクが含まれる列を判定して設定
+
+                    # 🔗 URL列の自動判定＆クレンジング（無効な文字を空欄にする）
                     column_config = {}
+                    results = results.copy()
+
                     for col in results.columns:
-                        col_lower = str(col).lower()
-                        if "url" in col_lower or "リンク" in col_lower or "link" in col_lower:
-                            column_config[col] = st.column_config.LinkColumn(
-                                col,
-                                display_text="🔗 視聴する"  # クリック文字（URLそのまま表示したい場合は display_text=None にする）
+                        if "url" in col.lower() or "リンク" in col or "link" in col.lower():
+                            # http:// または https:// で始まらない値（「-」「ー」「なし」等）を None(空欄) に変換
+                            results[col] = results[col].apply(
+                                lambda x: str(x).strip() if pd.notna(x) and str(x).strip().startswith(("http://", "https://")) else None
                             )
 
-                    # テーブル表示
+                            column_config[col] = st.column_config.LinkColumn(
+                                col,
+                                display_text="視聴する 🔗"
+                            )
+
                     st.dataframe(
                         results,
-                        column_config=column_config,
                         use_container_width=True,
-                        hide_index=True  # 左端の行番号(0, 1, 2...)を非表示
+                        column_config=column_config
                     )
                 else:
                     st.warning("該当する履歴が見つかりませんでした。")
