@@ -277,7 +277,8 @@ if df is not None:
                     st.dataframe(
                         results,
                         use_container_width=True,
-                        column_config=column_config
+                        column_config=column_config,
+			hide_index=True
                     )
                 else:
                     st.warning("該当する履歴が見つかりませんでした。")
