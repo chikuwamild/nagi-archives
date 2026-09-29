@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import unicodedata
 
-# 1. ページの設定（ブラウザのタブ名とアイコン）
+# 1. ページの設定
 st.set_page_config(page_title="Nagi Archives DB", page_icon="🎸", layout="centered")
 
 # 2. CSSの設定
@@ -12,10 +12,16 @@ st.markdown(
     /* フォントをインポート */
     @import url('https://fonts.googleapis.com/css2?family=Anton&family=Noto+Sans+JP:wght@400;700;900&display=swap');
 
-    /* メニューバー・ヘッダー・フッターを非表示化 */
+    /* 標準のメニューバー・ヘッダー・フッターを非表示化 */
     #MainMenu { visibility: hidden; }
     footer { visibility: hidden; }
     header { visibility: hidden; }
+
+    /* 画面上部・周囲の余白を小さくして上に詰める */
+    .main .block-container {
+        padding-top: 1.5rem !important;
+        padding-bottom: 3rem !important;
+    }
 
     /* 全体のフォントと背景色 */
     html, body, [class*="css"] {
@@ -66,7 +72,7 @@ st.markdown(
         color: #8892B0 !important;
         font-size: 13px;
         margin-top: -5px;
-        margin-bottom: 35px;
+        margin-bottom: 30px;
         letter-spacing: 1.5px;
     }
 
@@ -146,6 +152,9 @@ st.markdown(
 
     /* スマホ表示のレスポンシブ調整 */
     @media (max-width: 600px) {
+        .main .block-container {
+            padding-top: 1rem !important;
+        }
         .nagi-title {
             font-size: 38px !important;
         }
@@ -258,7 +267,7 @@ if df is not None:
                 if not results.empty:
                     st.success(f"🔥 {len(results)} 件の履歴が見つかりました！")
 
-                    # 🔗 URL列の自動判定＆クレンジング（無効な文字を空欄にする）
+                    # 🔗 URL列の自動判定＆クレンジング
                     column_config = {}
                     results = results.copy()
 
@@ -274,11 +283,12 @@ if df is not None:
                                 display_text="視聴する 🔗"
                             )
 
+                    # インデックスを非表示化
                     st.dataframe(
                         results,
                         use_container_width=True,
                         column_config=column_config,
-			hide_index=True
+                        hide_index=True
                     )
                 else:
                     st.warning("該当する履歴が見つかりませんでした。")
