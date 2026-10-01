@@ -1,0 +1,21 @@
+name: Keep Streamlit App Awake
+
+on:
+  schedule:
+    # 毎日 日本時間の「朝7時」と「夜17時」の2回（10時間おき）に実行
+    - cron: '0 2,12 * * *' 
+  workflow_dispatch: # 手動でいつでも実行できるようにするボタン
+
+jobs:
+  keep_alive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Keep alive commit
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@://github.com"
+          git commit --allow-empty -m "Keep-alive trigger"
+          git push
