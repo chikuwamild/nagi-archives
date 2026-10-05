@@ -371,7 +371,7 @@ if df is not None:
                 st.write("ランキングデータがありません。")
 
         else:
-            st.error("Excelに「曲名」列がありません。")
+            st.error("「曲名」列がありません。")
 
 
     # 歌ったアーティスト TOP10
@@ -424,7 +424,7 @@ if df is not None:
 
         else:
             st.error(
-                "Excelに「アーティスト名」列がありません。"
+                "「アーティスト名」列がありません。"
             )
 
 
