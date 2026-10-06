@@ -5,7 +5,7 @@ import unicodedata
 # 1. ページの設定
 st.set_page_config(
     page_title="Nagi Archives DB",
-    page_icon="🎸",
+    page_icon="icon.png",
     layout="centered"
 )
 
@@ -528,7 +528,7 @@ if df is not None:
         )
 
         search_button = st.form_submit_button(
-            "🔍 SEARCH 👇🏻"
+            "🔍 SEARCH 👇"
         )
 
 
