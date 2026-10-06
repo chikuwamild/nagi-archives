@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import unicodedata
+import base64
 
 # 1. ページの設定
 st.set_page_config(
@@ -9,10 +10,13 @@ st.set_page_config(
     layout="centered"
 )
 
+# 背景アイコンを読み込む
+with open("icon.png", "rb") as f:
+    icon_base64 = base64.b64encode(f.read()).decode()
+
 # 2. CSSの設定
-st.markdown(
-    """
-    <style>
+css = """
+<style>
 
     /* フォントをインポート */
     @import url('https://fonts.googleapis.com/css2?family=Anton&family=Noto+Sans+JP:wght@400;700;900&display=swap');
@@ -47,9 +51,40 @@ st.markdown(
     }
 
     .stApp {
-        background-color: #0B0D12 !important;
-        color: #E0E0E0 !important;
-    }
+    background-color: #0B0D12 !important;
+    color: #E0E0E0 !important;
+    position: relative;
+    isolation: isolate;
+}
+
+/* ========================================
+   背景にアイコンを薄く表示
+   ======================================== */
+.stApp::after {
+    content: "";
+    position: fixed;
+    right: -80px;
+    bottom: -80px;
+    width: 420px;
+    height: 420px;
+
+    background-image: url("data:image/png;base64,ICON_BASE64");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+
+    opacity: 0.5;
+    pointer-events: none;
+
+    z-index: 0;
+}
+
+/* 本体をアイコンより前にする */
+[data-testid="stAppViewContainer"] {
+    position: relative;
+    z-index: 1;
+    background: transparent !important;
+}
 
     /* ラベルや通常テキスト */
     p,
@@ -224,9 +259,18 @@ st.markdown(
         margin-top: 5px !important;
         margin-bottom: 5px !important;
     }
+    
 
     /* スマホ表示 */
     @media (max-width: 600px) {
+
+        .stApp::after {
+            right: -100px;
+            bottom: -60px;
+            width: 300px;
+            height: 300px;
+            opacity: 0.5;
+        }
 
         .main .block-container,
         [data-testid="stMainBlockContainer"] {
@@ -261,8 +305,14 @@ st.markdown(
         }
     }
 
-    </style>
-    """,
+</style>
+"""
+
+# CSS内のICON_BASE64を実際の画像データに置き換える
+css = css.replace("ICON_BASE64", icon_base64)
+
+st.markdown(
+    css,
     unsafe_allow_html=True
 )
 
@@ -389,7 +439,7 @@ if df is not None:
                             f'<div class="ranking-count">{count}回</div>'
                             f'</div>',
                             unsafe_allow_html=True
-                       )
+                        )
 
                 else:
                     st.write("ランキングデータがありません。")
@@ -571,13 +621,10 @@ if df is not None:
                         na=False
                     )
 
-
                 results = df[mask]
-
 
                 # 検索結果の表示
                 st.markdown("---")
-
 
                 if not results.empty:
 
@@ -585,11 +632,9 @@ if df is not None:
                         f"🔥 {len(results)} 件の履歴が見つかりました！"
                     )
 
-
                     # URL列の自動判定＆クレンジング
                     column_config = {}
                     results = results.copy()
-
 
                     for col in results.columns:
 
@@ -616,7 +661,6 @@ if df is not None:
                                 )
                             )
 
-
                     # インデックスを非表示化
                     st.dataframe(
                         results,
@@ -625,13 +669,11 @@ if df is not None:
                         hide_index=True
                     )
 
-
                 else:
 
                     st.warning(
                         "該当する履歴が見つかりませんでした。"
                     )
-
 
             else:
 
@@ -644,7 +686,6 @@ if df is not None:
                     "💡 現在の列名:",
                     list(df.columns)
                 )
-
 
         else:
 
