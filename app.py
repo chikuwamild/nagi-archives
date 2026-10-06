@@ -325,54 +325,80 @@ if df is not None:
     # 歌った曲 TOP10
     with st.expander("🏆 歌った曲 TOP10"):
 
+        # オリ曲を含めないチェックボックス
+        exclude_original = st.checkbox(
+            "オリ曲を含めない"
+        )
+
         if "曲名" in df.columns:
 
-            song_ranking = (
-                df["曲名"]
-                .dropna()
-                .astype(str)
-                .str.strip()
-                .value_counts()
-                .head(10)
-            )
+            # ランキング用データ
+            ranking_df = df.copy()
 
-            if not song_ranking.empty:
+            # 「オリ曲を含めない」にチェックが入っている場合、
+            # イザナギ・エルヴァの曲を除外
+            if exclude_original and "アーティスト名" in ranking_df.columns:
+                ranking_df = ranking_df[
+                    ranking_df["アーティスト名"]
+                    .astype(str)
+                    .str.strip()
+                    != "イザナギ・エルヴァ"
+                ]
 
-                medals = ["🥇", "🥈", "🥉"]
+            # 曲名＋アーティスト名の組み合わせでランキング
+            if "アーティスト名" in ranking_df.columns:
 
-                for rank, (song, count) in enumerate(
-                    song_ranking.items(),
-                    start=1
-                ):
-
-                    if rank <= 3:
-                        rank_display = medals[rank - 1]
-                    else:
-                        rank_display = f"{rank}位"
-
-                    st.markdown(
-                        f"""
-                        <div class="ranking-item">
-                            <div class="ranking-rank">
-                                {rank_display}
-                            </div>
-                            <div class="ranking-name">
-                                {song}
-                            </div>
-                            <div class="ranking-count">
-                                {count}回
-                            </div>
-                        </div>
-                        """,
-                        unsafe_allow_html=True
+                song_ranking = (
+                    ranking_df[
+                        ["曲名", "アーティスト名"]
+                    ]
+                    .dropna(subset=["曲名"])
+                    .assign(
+                        曲名=lambda x: x["曲名"].astype(str).str.strip(),
+                        アーティスト名=lambda x: x["アーティスト名"]
+                        .astype(str)
+                        .str.strip()
                     )
+                    .value_counts()
+                    .head(10)
+                )
+
+                if not song_ranking.empty:
+
+                    medals = ["🥇", "🥈", "🥉"]
+
+                    for rank, ((song, artist), count) in enumerate(
+                        song_ranking.items(),
+                        start=1
+                    ):
+
+                        if rank <= 3:
+                            rank_display = medals[rank - 1]
+                        else:
+                            rank_display = f"{rank}位"
+
+                        st.markdown(
+                            f'<div class="ranking-item">'
+                            f'<div class="ranking-rank">{rank_display}</div>'
+                            f'<div class="ranking-name">'
+                            f'{song}'
+                            f'<div style="font-size:13px; font-weight:500; margin-top:3px; color:#B8C0D9;">'
+                            f'{artist}'
+                            f'</div>'
+                            f'</div>'
+                            f'<div class="ranking-count">{count}回</div>'
+                            f'</div>',
+                            unsafe_allow_html=True
+                       )
+
+                else:
+                    st.write("ランキングデータがありません。")
 
             else:
-                st.write("ランキングデータがありません。")
+                st.error("Excelに「アーティスト名」列がありません。")
 
         else:
-            st.error("「曲名」列がありません。")
-
+            st.error("Excelに「曲名」列がありません。")
 
     # 歌ったアーティスト TOP10
     with st.expander("🎤 歌ったアーティスト TOP10"):
