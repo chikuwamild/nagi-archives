@@ -319,11 +319,11 @@ df = load_data()
 if df is not None:
 
     # ========================================
-    # 🏆 ランキング
+    # 🫀 ランキング
     # ========================================
 
     # 歌った曲 TOP10
-    with st.expander("🏆 歌った曲 TOP10"):
+    with st.expander("🫀 歌った曲 TOP10"):
 
         # オリ曲を含めないチェックボックス
         exclude_original = st.checkbox(
