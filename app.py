@@ -305,6 +305,11 @@ css = """
         }
     }
 
+/* 右下のStreamlitアイコン2つを非表示 */
+[data-testid="stStatusWidget"] {
+    display: none !important;
+}
+
 </style>
 """
 
