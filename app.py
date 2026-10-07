@@ -305,8 +305,18 @@ css = """
         }
     }
 
-/* 右下のStreamlitアイコン2つを非表示 */
+/* 右下のStreamlitアイコンを非表示 */
 [data-testid="stStatusWidget"] {
+    display: none !important;
+}
+
+[data-testid="stDecoration"],
+.stDeployButton {
+    display: none !important;
+}
+
+div[class*="stStatusWidget"],
+div[class*="stDeployButton"] {
     display: none !important;
 }
 
