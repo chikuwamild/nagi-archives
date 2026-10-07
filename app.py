@@ -305,18 +305,19 @@ css = """
         }
     }
 
-/* 右下のStreamlitアイコンを非表示 */
-[data-testid="stStatusWidget"] {
+/* ========================================
+   右下のStreamlitボタンを非表示
+   ======================================== */
+
+/* 緑色のステータスボタン */
+div[class="stStatusWidget"] {
+    visibility: hidden !important;
     display: none !important;
 }
 
-[data-testid="stDecoration"],
-.stDeployButton {
-    display: none !important;
-}
-
-div[class*="stStatusWidget"],
-div[class*="stDeployButton"] {
+/* 赤色の「Hosted with Streamlit」ボタン */
+div[class="stDeployButton"] {
+    visibility: hidden !important;
     display: none !important;
 }
 
