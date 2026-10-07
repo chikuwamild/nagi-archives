@@ -269,7 +269,7 @@ css = """
             bottom: 10px;
             width: 300px;
             height: 300px;
-            opacity: 0.5;
+            opacity: 0.4;
         }
 
         .main .block-container,
