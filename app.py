@@ -305,22 +305,6 @@ css = """
         }
     }
 
-/* ========================================
-   右下のStreamlitボタンを非表示
-   ======================================== */
-
-/* 緑色のステータスボタン */
-div[class="stStatusWidget"] {
-    visibility: hidden !important;
-    display: none !important;
-}
-
-/* 赤色の「Hosted with Streamlit」ボタン */
-div[class="stDeployButton"] {
-    visibility: hidden !important;
-    display: none !important;
-}
-
 </style>
 """
 
