@@ -63,7 +63,7 @@ css = """
 .stApp::after {
     content: "";
     position: fixed;
-    right: -80px;
+    right: -40px;
     bottom: -80px;
     width: 420px;
     height: 420px;
@@ -265,8 +265,8 @@ css = """
     @media (max-width: 600px) {
 
         .stApp::after {
-            right: -100px;
-            bottom: -60px;
+            right: -60px;
+            bottom: 10px;
             width: 300px;
             height: 300px;
             opacity: 0.5;
