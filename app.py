@@ -73,7 +73,7 @@ css = """
     background-repeat: no-repeat;
     background-position: center;
 
-    opacity: 0.7;
+    opacity: 0.6;
     pointer-events: none;
 
     z-index: 0;
@@ -269,7 +269,7 @@ css = """
             bottom: 10px;
             width: 300px;
             height: 300px;
-            opacity: 0.7;
+            opacity: 0.5;
         }
 
         .main .block-container,
