@@ -332,7 +332,7 @@ st.markdown(
 
 # 更新日
 st.markdown(
-    "<div class='update-date'>※非公式だよ(✨公認✨)※<br>2026年10月09日更新</div>",
+    "<div class='update-date'>✨公認アプリ✨<br>2026年10月09日更新</div>",
     unsafe_allow_html=True
 )
 
