@@ -64,7 +64,7 @@ css = """
     content: "";
     position: fixed;
     right: -40px;
-    bottom: -80px;
+    bottom: 0px;
     width: 420px;
     height: 420px;
 
