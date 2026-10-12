@@ -359,6 +359,32 @@ css = """
     /* スマホ表示 */
     @media (max-width: 600px) {
 
+        /* ページ送りと検索結果の3列を、スマホでも横並びにする */
+        [data-testid="stHorizontalBlock"] {
+            flex-direction: row !important;
+            flex-wrap: nowrap !important;
+            align-items: flex-start !important;
+            gap: 0.35rem !important;
+        }
+
+        [data-testid="stHorizontalBlock"] > [data-testid="column"] {
+            min-width: 0 !important;
+            width: auto !important;
+            flex-basis: 0% !important;
+        }
+
+        /* ページ送りボタンの文字が折り返されないようにする */
+        [data-testid="stButton"] > button {
+            padding: 0.35rem 0.15rem !important;
+            white-space: nowrap !important;
+            font-size: 11px !important;
+        }
+
+        [data-testid="stButton"] > button p {
+            white-space: nowrap !important;
+            font-size: 11px !important;
+        }
+
         .stApp::after {
             right: -60px;
             bottom: 10px;
