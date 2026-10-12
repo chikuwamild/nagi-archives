@@ -376,19 +376,40 @@ css = """
         }
 
         /* ページ送りは3列を均等にし、必ず1行に収める */
-        [data-testid="stHorizontalBlock"]:has(button[key*="_prev_top"]),
-        [data-testid="stHorizontalBlock"]:has(button[key*="_prev_bottom"]) {
+        .st-key-pagination_top [data-testid="stHorizontalBlock"],
+        .st-key-pagination_bottom [data-testid="stHorizontalBlock"] {
             display: grid !important;
-            grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr) minmax(0, 1fr) !important;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 0.65fr) minmax(0, 1fr) !important;
             gap: 4px !important;
             width: 100% !important;
             min-width: 0 !important;
         }
 
+        .st-key-pagination_top [data-testid="stHorizontalBlock"] > [data-testid="stColumn"],
+        .st-key-pagination_bottom [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
+            width: auto !important;
+            min-width: 0 !important;
+            flex: none !important;
+            padding: 0 !important;
+        }
+
+        .st-key-pagination_top button,
+        .st-key-pagination_bottom button {
+            min-width: 0 !important;
+            padding: 0.25rem 0.05rem !important;
+            white-space: nowrap !important;
+        }
+
+        .st-key-pagination_top [data-testid="stCaptionContainer"],
+        .st-key-pagination_bottom [data-testid="stCaptionContainer"] {
+            white-space: nowrap !important;
+            text-align: center !important;
+        }
+
         /* 検索結果の行だけ、サムネイル・情報・視聴ボタンを横並び */
         [data-testid="stHorizontalBlock"]:has([data-testid="stImage"]) {
             display: grid !important;
-            grid-template-columns: minmax(0, 24%) minmax(0, 1fr) minmax(0, 18%) !important;
+            grid-template-columns: minmax(0, 20%) minmax(0, 1fr) minmax(0, 23%) !important;
             align-items: start !important;
             gap: 5px !important;
             width: 100% !important;
@@ -404,6 +425,19 @@ css = """
             flex: none !important;
             padding: 0 !important;
             box-sizing: border-box !important;
+        }
+
+        [data-testid="stLinkButton"] a,
+        [data-testid="stLinkButton"] p {
+            min-width: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            padding: 0.25rem 0.1rem !important;
+            font-size: 10px !important;
+            white-space: nowrap !important;
+            overflow: visible !important;
+            text-overflow: clip !important;
+            justify-content: center !important;
         }
 
         [data-testid="stHorizontalBlock"]:has([data-testid="stImage"]) [data-testid="stImage"],
@@ -1046,31 +1080,32 @@ if df is not None:
                     page_num = max(1, min(total_pages, int(st.session_state[page_key])))
                     st.session_state[page_key] = page_num
 
-                    # 上部のページ切替（下部と同じボタン形式）
-                    top_prev_col, top_page_col, top_next_col = st.columns([1, 1, 1])
-                    with top_prev_col:
-                        st.button(
-                            "← 前へ",
-                            key=f"{page_key}_prev_top",
-                            disabled=page_num <= 1,
-                            use_container_width=True,
-                            on_click=set_search_page,
-                            args=(page_num - 1,)
-                        )
-                    with top_page_col:
-                        st.caption(
-                            f"ページ {page_num} / {total_pages}",
-                            text_alignment="center"
-                        )
-                    with top_next_col:
-                        st.button(
-                            "次へ →",
-                            key=f"{page_key}_next_top",
-                            disabled=page_num >= total_pages,
-                            use_container_width=True,
-                            on_click=set_search_page,
-                            args=(page_num + 1,)
-                        )
+                    # 上部ページ切替（スマホでも1行に固定）
+                    with st.container(key="pagination_top"):
+                        top_prev_col, top_page_col, top_next_col = st.columns([1, 1, 1])
+                        with top_prev_col:
+                            st.button(
+                                "← 前へ",
+                                key=f"{page_key}_prev_top",
+                                disabled=page_num <= 1,
+                                use_container_width=True,
+                                on_click=set_search_page,
+                                args=(page_num - 1,)
+                            )
+                        with top_page_col:
+                            st.caption(
+                                f"ページ {page_num} / {total_pages}",
+                                text_alignment="center"
+                            )
+                        with top_next_col:
+                            st.button(
+                                "次へ →",
+                                key=f"{page_key}_next_top",
+                                disabled=page_num >= total_pages,
+                                use_container_width=True,
+                                on_click=set_search_page,
+                                args=(page_num + 1,)
+                            )
 
                     # 上部ページ切替と検索結果の間に区切り線を表示
                     st.divider()
@@ -1190,31 +1225,32 @@ if df is not None:
                         unsafe_allow_html=True
                     )
 
-                    # 下部ページ切替は上部と同じ配置・サイズ・形式に統一
-                    bottom_prev_col, bottom_page_col, bottom_next_col = st.columns([1, 1, 1])
-                    with bottom_prev_col:
-                        st.button(
-                            "← 前へ",
-                            key=f"{page_key}_prev_bottom",
-                            disabled=page_num <= 1,
-                            use_container_width=True,
-                            on_click=set_search_page,
-                            args=(page_num - 1,)
-                        )
-                    with bottom_page_col:
-                        st.caption(
-                            f"ページ {page_num} / {total_pages}",
-                            text_alignment="center"
-                        )
-                    with bottom_next_col:
-                        st.button(
-                            "次へ →",
-                            key=f"{page_key}_next_bottom",
-                            disabled=page_num >= total_pages,
-                            use_container_width=True,
-                            on_click=set_search_page,
-                            args=(page_num + 1,)
-                        )
+                    # 下部ページ切替（スマホでも1行に固定）
+                    with st.container(key="pagination_bottom"):
+                        bottom_prev_col, bottom_page_col, bottom_next_col = st.columns([1, 1, 1])
+                        with bottom_prev_col:
+                            st.button(
+                                "← 前へ",
+                                key=f"{page_key}_prev_bottom",
+                                disabled=page_num <= 1,
+                                use_container_width=True,
+                                on_click=set_search_page,
+                                args=(page_num - 1,)
+                            )
+                        with bottom_page_col:
+                            st.caption(
+                                f"ページ {page_num} / {total_pages}",
+                                text_alignment="center"
+                            )
+                        with bottom_next_col:
+                            st.button(
+                                "次へ →",
+                                key=f"{page_key}_next_bottom",
+                                disabled=page_num >= total_pages,
+                                use_container_width=True,
+                                on_click=set_search_page,
+                                args=(page_num + 1,)
+                            )
 
                 else:
                     st.warning("該当する履歴が見つかりませんでした。")
