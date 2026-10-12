@@ -135,10 +135,11 @@ css = """
     .update-date {
         text-align: center;
         color: #8892B0 !important;
-        font-size: 13px;
+        font-size: 10px !important;
+        line-height: 1.3 !important;
         margin-top: -5px;
         margin-bottom: 30px;
-        letter-spacing: 1.5px;
+        letter-spacing: 0.5px;
     }
 
     /* セクションタイトル */
