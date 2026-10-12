@@ -359,30 +359,43 @@ css = """
     /* スマホ表示 */
     @media (max-width: 600px) {
 
-        /* ページ送りと検索結果の3列を、スマホでも横並びにする */
-        [data-testid="stHorizontalBlock"] {
-            flex-direction: row !important;
-            flex-wrap: nowrap !important;
-            align-items: flex-start !important;
-            gap: 0.35rem !important;
-        }
-
-        [data-testid="stHorizontalBlock"] > [data-testid="column"] {
-            min-width: 0 !important;
-            width: auto !important;
-            flex-basis: 0% !important;
-        }
-
-        /* ページ送りボタンの文字が折り返されないようにする */
+        /* スマホでは画面幅を超えないよう、全体の横並び設定は変更しない */
+        /* ページ送りボタンだけ文字と余白を少し小さくする */
         [data-testid="stButton"] > button {
-            padding: 0.35rem 0.15rem !important;
-            white-space: nowrap !important;
-            font-size: 11px !important;
+            padding: 0.3rem 0.1rem !important;
+            font-size: 10px !important;
+            min-width: 0 !important;
+            width: 100% !important;
         }
 
         [data-testid="stButton"] > button p {
-            white-space: nowrap !important;
-            font-size: 11px !important;
+            font-size: 10px !important;
+            white-space: normal !important;
+            line-height: 1.2 !important;
+        }
+
+        /* サムネイルを含む検索結果の行だけ横並びにし、画面幅内に収める */
+        [data-testid="stHorizontalBlock"]:has([data-testid="stImage"]) {
+            flex-direction: row !important;
+            flex-wrap: nowrap !important;
+            align-items: flex-start !important;
+            gap: 0.3rem !important;
+            width: 100% !important;
+            min-width: 0 !important;
+        }
+
+        [data-testid="stHorizontalBlock"]:has([data-testid="stImage"]) > [data-testid="column"] {
+            min-width: 0 !important;
+            width: auto !important;
+            flex: 1 1 0% !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+
+        [data-testid="stHorizontalBlock"]:has([data-testid="stImage"]) [data-testid="stImage"] img {
+            width: 100% !important;
+            height: auto !important;
+            object-fit: contain !important;
         }
 
         .stApp::after {
