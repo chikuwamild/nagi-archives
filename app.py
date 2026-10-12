@@ -546,7 +546,7 @@ st.markdown(
 
 # 更新日
 st.markdown(
-    "<div class='update-date'>✨公認アプリ✨<br>2026年10月12日更新(現在登録742曲)</div>",
+    "<div class='update-date'>✨公認アプリ✨<br>2026年10月12日更新(TOTAL TRACKS:742)</div>",
     unsafe_allow_html=True
 )
 
