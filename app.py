@@ -370,32 +370,58 @@ css = """
 
         [data-testid="stButton"] > button p {
             font-size: 10px !important;
-            white-space: normal !important;
-            line-height: 1.2 !important;
+            white-space: nowrap !important;
+            line-height: 1.15 !important;
+            margin: 0 !important;
         }
 
-        /* サムネイルを含む検索結果の行だけ横並びにし、画面幅内に収める */
-        [data-testid="stHorizontalBlock"]:has([data-testid="stImage"]) {
-            flex-direction: row !important;
-            flex-wrap: nowrap !important;
-            align-items: flex-start !important;
-            gap: 0.3rem !important;
+        /* ページ送りは3列を均等にし、必ず1行に収める */
+        [data-testid="stHorizontalBlock"]:has(button[key*="_prev_top"]),
+        [data-testid="stHorizontalBlock"]:has(button[key*="_prev_bottom"]) {
+            display: grid !important;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr) minmax(0, 1fr) !important;
+            gap: 4px !important;
             width: 100% !important;
             min-width: 0 !important;
+        }
+
+        /* 検索結果の行だけ、サムネイル・情報・視聴ボタンを横並び */
+        [data-testid="stHorizontalBlock"]:has([data-testid="stImage"]) {
+            display: grid !important;
+            grid-template-columns: minmax(0, 24%) minmax(0, 1fr) minmax(0, 18%) !important;
+            align-items: start !important;
+            gap: 5px !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            min-width: 0 !important;
+            box-sizing: border-box !important;
         }
 
         [data-testid="stHorizontalBlock"]:has([data-testid="stImage"]) > [data-testid="column"] {
             min-width: 0 !important;
             width: auto !important;
-            flex: 1 1 0% !important;
-            padding-left: 0 !important;
-            padding-right: 0 !important;
+            max-width: 100% !important;
+            flex: none !important;
+            padding: 0 !important;
+            box-sizing: border-box !important;
         }
 
+        [data-testid="stHorizontalBlock"]:has([data-testid="stImage"]) [data-testid="stImage"],
         [data-testid="stHorizontalBlock"]:has([data-testid="stImage"]) [data-testid="stImage"] img {
+            display: block !important;
             width: 100% !important;
+            max-width: 100% !important;
             height: auto !important;
             object-fit: contain !important;
+        }
+
+        /* スマホで本文全体が横にはみ出さないようにする */
+        [data-testid="stMainBlockContainer"] {
+            width: 100% !important;
+            max-width: 100vw !important;
+            padding-left: 0.75rem !important;
+            padding-right: 0.75rem !important;
+            box-sizing: border-box !important;
         }
 
         .stApp::after {
@@ -1021,10 +1047,10 @@ if df is not None:
                     st.session_state[page_key] = page_num
 
                     # 上部のページ切替（下部と同じボタン形式）
-                    top_prev_col, top_page_col, top_next_col = st.columns([1, 2, 1])
+                    top_prev_col, top_page_col, top_next_col = st.columns([1, 1, 1])
                     with top_prev_col:
                         st.button(
-                            "← 前のページ",
+                            "← 前へ",
                             key=f"{page_key}_prev_top",
                             disabled=page_num <= 1,
                             use_container_width=True,
@@ -1038,7 +1064,7 @@ if df is not None:
                         )
                     with top_next_col:
                         st.button(
-                            "次のページ →",
+                            "次へ →",
                             key=f"{page_key}_next_top",
                             disabled=page_num >= total_pages,
                             use_container_width=True,
@@ -1165,10 +1191,10 @@ if df is not None:
                     )
 
                     # 下部ページ切替は上部と同じ配置・サイズ・形式に統一
-                    bottom_prev_col, bottom_page_col, bottom_next_col = st.columns([1, 2, 1])
+                    bottom_prev_col, bottom_page_col, bottom_next_col = st.columns([1, 1, 1])
                     with bottom_prev_col:
                         st.button(
-                            "← 前のページ",
+                            "← 前へ",
                             key=f"{page_key}_prev_bottom",
                             disabled=page_num <= 1,
                             use_container_width=True,
@@ -1182,7 +1208,7 @@ if df is not None:
                         )
                     with bottom_next_col:
                         st.button(
-                            "次のページ →",
+                            "次へ →",
                             key=f"{page_key}_next_bottom",
                             disabled=page_num >= total_pages,
                             use_container_width=True,
