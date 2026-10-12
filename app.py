@@ -237,7 +237,7 @@ css = """
         outline-offset: 2px !important;
     }
 
-    /* 無効なページ切替ボタンも白くならず、読める色にする */
+    /* 無効なページ切替ボタン可視性考慮 */
     [data-testid="stButton"] > button:disabled,
     [data-testid="stButton"] > button:disabled p {
         background: #10141C !important;
@@ -292,7 +292,7 @@ css = """
         color: #FFFFFF !important;
     }
 
-    /* 検索結果の視聴ボタンをコンパクトに */
+    /* 検索結果の視聴ボタン */
     [data-testid="stLinkButton"] a {
         padding: 0.35rem 0.45rem !important;
         min-height: 0 !important;
@@ -400,7 +400,7 @@ css = """
     }
 
 
-    /* TOP10の開閉エリア：フォーカス・ホバー時も白くならず、青系で強調 */
+    /* TOP10の開閉エリア：フォーカス・ホバー青系で強調 */
     [data-testid="stExpander"] details,
     [data-testid="stExpander"] summary {
         background-color: #0B0D12 !important;
@@ -446,7 +446,7 @@ css = """
     }
 
 
-    /* 全体の文字をひと回りコンパクトにする（ブラウザ倍率は変更しない） */
+    /* 全体の文字 */
     html {
         font-size: 90% !important;
     }
@@ -469,7 +469,7 @@ css = """
         font-size: 0.9rem;
     }
 
-    /* TOP10の結果・アーカイブ検索タイトルもコンパクトに */
+    /* TOP10の結果・アーカイブ検索タイトル */
     [data-testid="stExpander"] [data-testid="stMarkdownContainer"] p {
         font-size: 0.85rem !important;
     }
@@ -492,7 +492,7 @@ css = """
         letter-spacing: 1px !important;
     }
 
-    /* TOP10内のランキング名・回数をコンパクトに */
+    /* TOP10内のランキング名・回数 */
     [data-testid="stAppViewContainer"] .ranking-name {
         font-size: 13px !important;
         line-height: 1.25 !important;
@@ -502,7 +502,7 @@ css = """
         line-height: 1.25 !important;
     }
 
-    /* TOP10の開閉見出し自体も少し小さく */
+    /* TOP10の開閉見出し */
     [data-testid="stAppViewContainer"] [data-testid="stExpander"] summary,
     [data-testid="stAppViewContainer"] [data-testid="stExpander"] summary p {
         font-size: 14px !important;
@@ -510,7 +510,7 @@ css = """
     }
 
 
-    /* 歌った曲TOP：アーティスト名を曲名より小さく表示 */
+    /* 歌った曲TOP：アーティスト名 */
     [data-testid="stExpander"] .ranking-item .ranking-name .ranking-artist,
     [data-testid="stExpander"] .ranking-item .ranking-name div.ranking-artist {
         display: block !important;
@@ -1099,7 +1099,7 @@ if df is not None:
                                         if pd.notna(value) and str(value).strip() and str(value).strip() not in {"-", "－"}:
                                             st.caption(f"⏱ タイムスタンプ：{value}")
 
-                                # 右：小さめの視聴ボタン
+                                # 右：視聴ボタン
                                 with link_col:
                                     if link_url:
                                         st.link_button(
