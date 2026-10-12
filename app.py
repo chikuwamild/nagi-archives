@@ -2,6 +2,10 @@ import streamlit as st
 import pandas as pd
 import unicodedata
 import base64
+import requests
+from io import BytesIO
+from urllib.parse import urlparse, parse_qs
+from concurrent.futures import ThreadPoolExecutor
 
 # 1. ページの設定
 st.set_page_config(
@@ -188,6 +192,65 @@ css = """
         box-shadow: 0 0 10px rgba(255, 20, 147, 0.5) !important;
     }
 
+    /* ページ切替ボタン：通常・ホバー・クリック時で色を変えて操作を分かりやすくする */
+    [data-testid="stButton"] > button {
+        background: #151923 !important;
+        color: #F8FAFC !important;
+        border: 1px solid #303746 !important;
+        box-shadow: none !important;
+        opacity: 1 !important;
+        transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.08s ease !important;
+    }
+
+    [data-testid="stButton"] > button p {
+        color: #F8FAFC !important;
+    }
+
+    /* マウスを乗せたとき：青に変化 */
+    [data-testid="stButton"] > button:hover:not(:disabled) {
+        background: #2563EB !important;
+        border-color: #60A5FA !important;
+        color: #FFFFFF !important;
+        box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.25) !important;
+    }
+
+    [data-testid="stButton"] > button:hover:not(:disabled) p {
+        color: #FFFFFF !important;
+    }
+
+    /* クリック中：ピンクに変化 */
+    [data-testid="stButton"] > button:active:not(:disabled) {
+        background: #C02678 !important;
+        border-color: #FF1493 !important;
+        color: #FFFFFF !important;
+        transform: translateY(1px) !important;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.25) !important;
+    }
+
+    [data-testid="stButton"] > button:active:not(:disabled) p {
+        color: #FFFFFF !important;
+    }
+
+    /* キーボード操作などでフォーカスされたとき：青い枠で表示 */
+    [data-testid="stButton"] > button:focus-visible {
+        outline: 2px solid #60A5FA !important;
+        outline-offset: 2px !important;
+    }
+
+    /* 無効なページ切替ボタンも白くならず、読める色にする */
+    [data-testid="stButton"] > button:disabled,
+    [data-testid="stButton"] > button:disabled p {
+        background: #10141C !important;
+        color: #778092 !important;
+        border-color: #202631 !important;
+        opacity: 1 !important;
+        cursor: not-allowed !important;
+    }
+
+    [data-testid="stButton"] > button:disabled p {
+        color: #778092 !important;
+    }
+
     /* 検索ボタン */
     button[kind="secondaryFormSubmit"] {
         background: linear-gradient(
@@ -215,6 +278,37 @@ css = """
             0 0 25px rgba(255, 20, 147, 0.7),
             0 0 12px rgba(37, 99, 235, 0.6) !important;
         cursor: pointer;
+    }
+
+    /* 視聴リンクボタン */
+    a[data-testid="stLinkButton"] {
+        background: linear-gradient(135deg, #1E3A8A 0%, #FF1493 100%) !important;
+        color: #FFFFFF !important;
+        border: none !important;
+        border-radius: 4px !important;
+    }
+
+    a[data-testid="stLinkButton"] p {
+        color: #FFFFFF !important;
+    }
+
+    /* 検索結果の視聴ボタンをコンパクトに */
+    [data-testid="stLinkButton"] a {
+        padding: 0.35rem 0.45rem !important;
+        min-height: 0 !important;
+        font-size: 0.78rem !important;
+        white-space: nowrap !important;
+        border-radius: 6px !important;
+        background: #25204A !important;
+        color: #FF4DA6 !important;
+        border: 1px solid #45356D !important;
+    }
+
+    /* 検索結果内の補助情報は詰めて表示 */
+    [data-testid="stVerticalBlock"] [data-testid="stCaptionContainer"] p {
+        font-size: 0.78rem !important;
+        line-height: 1.35 !important;
+        margin-bottom: 0.15rem !important;
     }
 
     /* ランキング */
@@ -305,7 +399,127 @@ css = """
         }
     }
 
-</style>
+
+    /* TOP10の開閉エリア：フォーカス・ホバー時も白くならず、青系で強調 */
+    [data-testid="stExpander"] details,
+    [data-testid="stExpander"] summary {
+        background-color: #0B0D12 !important;
+        color: #F8FAFC !important;
+        border-color: #252B38 !important;
+    }
+
+    [data-testid="stExpander"] summary:hover {
+        background-color: #17213A !important;
+        color: #FFFFFF !important;
+        border-color: #2563EB !important;
+    }
+
+    [data-testid="stExpander"] summary:focus,
+    [data-testid="stExpander"] summary:focus-visible,
+    [data-testid="stExpander"] details:focus,
+    [data-testid="stExpander"] details:focus-visible {
+        background-color: #17213A !important;
+        color: #FFFFFF !important;
+        outline: 2px solid #2563EB !important;
+        outline-offset: 2px !important;
+        box-shadow: none !important;
+    }
+
+    [data-testid="stExpander"] summary p,
+    [data-testid="stExpander"] summary span,
+    [data-testid="stExpander"] summary svg {
+        color: #F8FAFC !important;
+        fill: currentColor !important;
+    }
+
+    [data-testid="stExpander"] summary:hover p,
+    [data-testid="stExpander"] summary:hover span,
+    [data-testid="stExpander"] summary:hover svg,
+    [data-testid="stExpander"] summary:focus p,
+    [data-testid="stExpander"] summary:focus span,
+    [data-testid="stExpander"] summary:focus svg,
+    [data-testid="stExpander"] summary:focus-visible p,
+    [data-testid="stExpander"] summary:focus-visible span,
+    [data-testid="stExpander"] summary:focus-visible svg {
+        color: #FFFFFF !important;
+        fill: currentColor !important;
+    }
+
+
+    /* 全体の文字をひと回りコンパクトにする（ブラウザ倍率は変更しない） */
+    html {
+        font-size: 90% !important;
+    }
+    [data-testid="stAppViewContainer"] {
+        font-size: 0.9rem !important;
+    }
+    [data-testid="stAppViewContainer"] h1 {
+        font-size: 1.8rem !important;
+    }
+    [data-testid="stAppViewContainer"] h2 {
+        font-size: 1.45rem !important;
+    }
+    [data-testid="stAppViewContainer"] h3 {
+        font-size: 1.2rem !important;
+    }
+    [data-testid="stAppViewContainer"] p,
+    [data-testid="stAppViewContainer"] label,
+    [data-testid="stAppViewContainer"] .stMarkdown,
+    [data-testid="stAppViewContainer"] .stCaption {
+        font-size: 0.9rem;
+    }
+
+    /* TOP10の結果・アーカイブ検索タイトルもコンパクトに */
+    [data-testid="stExpander"] [data-testid="stMarkdownContainer"] p {
+        font-size: 0.85rem !important;
+    }
+    [data-testid="stExpander"] summary,
+    [data-testid="stExpander"] summary p {
+        font-size: 0.95rem !important;
+    }
+    /* 「🎸 全アーカイブ（歌枠）から探す」の見出し */
+    [data-testid="stAppViewContainer"] h1,
+    [data-testid="stAppViewContainer"] h2,
+    [data-testid="stAppViewContainer"] h3 {
+        line-height: 1.25 !important;
+    }
+
+
+    /* サイズ指定を明示的に上書き：アーカイブ見出し */
+    [data-testid="stAppViewContainer"] .archive-title {
+        font-size: 19px !important;
+        line-height: 1.25 !important;
+        letter-spacing: 1px !important;
+    }
+
+    /* TOP10内のランキング名・回数をコンパクトに */
+    [data-testid="stAppViewContainer"] .ranking-name {
+        font-size: 13px !important;
+        line-height: 1.25 !important;
+    }
+    [data-testid="stAppViewContainer"] .ranking-count {
+        font-size: 13px !important;
+        line-height: 1.25 !important;
+    }
+
+    /* TOP10の開閉見出し自体も少し小さく */
+    [data-testid="stAppViewContainer"] [data-testid="stExpander"] summary,
+    [data-testid="stAppViewContainer"] [data-testid="stExpander"] summary p {
+        font-size: 14px !important;
+        line-height: 1.25 !important;
+    }
+
+
+    /* 歌った曲TOP：アーティスト名を曲名より小さく表示 */
+    [data-testid="stExpander"] .ranking-item .ranking-name .ranking-artist,
+    [data-testid="stExpander"] .ranking-item .ranking-name div.ranking-artist {
+        display: block !important;
+        font-size: 11px !important;
+        line-height: 1.2 !important;
+        font-weight: 400 !important;
+        opacity: 0.82 !important;
+    }
+\n</style>
 """
 
 # CSS内のICON_BASE64を実際の画像データに置き換える
@@ -332,7 +546,7 @@ st.markdown(
 
 # 更新日
 st.markdown(
-    "<div class='update-date'>✨公認アプリ✨<br>2026年10月09日更新</div>",
+    "<div class='update-date'>✨公認アプリ✨<br>2026年10月12日更新(現在登録742曲)</div>",
     unsafe_allow_html=True
 )
 
@@ -348,6 +562,90 @@ def normalize_text(text):
     ).lower()
 
     return "".join(text.split())
+    
+def get_youtube_video_id(url):
+    """YouTubeのURLから動画IDを取得する"""
+    if pd.isna(url):
+        return None
+
+    try:
+        parsed = urlparse(str(url).strip())
+        host = parsed.netloc.lower().split(":")[0]
+
+        if host.startswith("www."):
+            host = host[4:]
+
+        video_id = None
+
+        if host == "youtu.be":
+            video_id = parsed.path.strip("/").split("/")[0]
+
+        elif host in {
+            "youtube.com",
+            "m.youtube.com",
+            "music.youtube.com"
+        }:
+            if parsed.path == "/watch":
+                video_id = parse_qs(
+                    parsed.query
+                ).get("v", [None])[0]
+
+            else:
+                parts = parsed.path.strip("/").split("/")
+
+                if (
+                    len(parts) >= 2
+                    and parts[0] in {"shorts", "live", "embed"}
+                ):
+                    video_id = parts[1]
+
+        if (
+            video_id
+            and len(video_id) == 11
+            and all(c.isalnum() or c in "_-" for c in video_id)
+        ):
+            return video_id
+
+    except Exception:
+        pass
+
+    return None
+
+
+# YouTubeサムネイルを取得する関数
+@st.cache_data(ttl=86400)
+def get_thumbnail(video_id):
+    if not video_id:
+        return None
+
+    thumbnail_url = (
+        "https://img.youtube.com/vi/"
+        f"{video_id}/hqdefault.jpg"
+    )
+
+    try:
+        response = requests.get(thumbnail_url, timeout=5)
+        response.raise_for_status()
+
+        # スマホでの小さな表示に合わせて縮小・圧縮し、
+        # Streamlitから配信する画像データ量を抑える
+        from PIL import Image
+        with Image.open(BytesIO(response.content)) as image:
+            image = image.convert("RGB")
+            image.thumbnail((300, 169), Image.Resampling.LANCZOS)
+
+            compressed = BytesIO()
+            image.save(
+                compressed,
+                format="JPEG",
+                quality=72,
+                optimize=True,
+                progressive=True
+            )
+            return compressed.getvalue()
+
+    except Exception:
+        return None
 
 
 # データの読み込み
@@ -432,7 +730,7 @@ if df is not None:
                             f'<div class="ranking-rank">{rank_display}</div>'
                             f'<div class="ranking-name">'
                             f'{song}'
-                            f'<div style="font-size:13px; font-weight:500; margin-top:3px; color:#B8C0D9;">'
+                            f'<div class="ranking-artist" style="font-size:11px !important; line-height:1.2 !important; font-weight:400 !important; margin-top:3px; color:#B8C0D9;">'
                             f'{artist}'
                             f'</div>'
                             f'</div>'
@@ -586,7 +884,8 @@ if df is not None:
     # 🔍 検索実行
     # ========================================
 
-    if search_button:
+    # ページ切り替え時も、入力済みの検索ワードで結果を再表示する
+    if search_button or search_word.strip():
 
         search_clean = normalize_text(search_word)
 
@@ -627,53 +926,232 @@ if df is not None:
                 st.markdown("---")
 
                 if not results.empty:
-
                     st.success(
                         f"🔥 {len(results)} 件の履歴が見つかりました！"
                     )
 
-                    # URL列の自動判定＆クレンジング
-                    column_config = {}
+                    # URL列を判定
                     results = results.copy()
-
-                    for col in results.columns:
-
+                    url_cols = [
+                        col for col in results.columns
                         if (
                             "url" in col.lower()
-                            or "リンク" in col
                             or "link" in col.lower()
-                        ):
+                            or "リンク" in col
+                        )
+                    ]
 
-                            results[col] = results[col].apply(
-                                lambda x:
-                                    str(x).strip()
-                                    if pd.notna(x)
-                                    and str(x).strip().startswith(
-                                        ("http://", "https://")
-                                    )
-                                    else None
-                            )
+                    # URLをクレンジング
+                    for col in url_cols:
+                        results[col] = results[col].apply(
+                            lambda x: str(x).strip()
+                            if pd.notna(x)
+                            and str(x).strip().startswith(("http://", "https://"))
+                            else None
+                        )
 
-                            column_config[col] = (
-                                st.column_config.LinkColumn(
-                                    col,
-                                    display_text="視聴する 🔗"
+                    # URL列から有効なURLを整理
+                    def get_row_urls(row):
+                        valid_urls = [
+                            str(row[col]).strip()
+                            for col in url_cols
+                            if pd.notna(row[col])
+                            and str(row[col]).strip().startswith(("http://", "https://"))
+                        ]
+                        video_url = next(
+                            (url for url in valid_urls if get_youtube_video_id(url)),
+                            None
+                        )
+                        video_id = get_youtube_video_id(video_url) if video_url else None
+                        link_url = video_url or (valid_urls[0] if valid_urls else None)
+                        return video_id, link_url
+
+                    # 件数が多い場合に一度に描画しない（1ページ20件）
+                    page_size = 20
+                    total_pages = (len(results) + page_size - 1) // page_size
+                    page_key = f"search_page_{search_type}_{search_clean}"
+                    if page_key not in st.session_state:
+                        st.session_state[page_key] = 1
+
+                    # 上下共通のページ切替処理
+                    def set_search_page(next_page):
+                        st.session_state[page_key] = max(1, min(total_pages, int(next_page)))
+
+                    page_num = max(1, min(total_pages, int(st.session_state[page_key])))
+                    st.session_state[page_key] = page_num
+
+                    # 上部のページ切替（下部と同じボタン形式）
+                    top_prev_col, top_page_col, top_next_col = st.columns([1, 2, 1])
+                    with top_prev_col:
+                        st.button(
+                            "← 前のページ",
+                            key=f"{page_key}_prev_top",
+                            disabled=page_num <= 1,
+                            use_container_width=True,
+                            on_click=set_search_page,
+                            args=(page_num - 1,)
+                        )
+                    with top_page_col:
+                        st.caption(
+                            f"ページ {page_num} / {total_pages}",
+                            text_alignment="center"
+                        )
+                    with top_next_col:
+                        st.button(
+                            "次のページ →",
+                            key=f"{page_key}_next_top",
+                            disabled=page_num >= total_pages,
+                            use_container_width=True,
+                            on_click=set_search_page,
+                            args=(page_num + 1,)
+                        )
+
+                    # 上部ページ切替と検索結果の間に区切り線を表示
+                    st.divider()
+
+                    start_idx = (int(page_num) - 1) * page_size
+                    page_results = results.iloc[start_idx:start_idx + page_size]
+
+                    # サムネイルの準備が完了してから結果一覧を描画し、初回表示の崩れを抑える
+                    with st.spinner("検索結果を読み込み中です… サムネイルと曲情報を準備しています"):
+                        # 表示対象のページ分だけサムネイルを取得
+                        row_data = []
+                        for _, row in page_results.iterrows():
+                            video_id, link_url = get_row_urls(row)
+                            row_data.append((row, video_id, link_url))
+
+                        # 並列取得して待ち時間を短縮
+                        with ThreadPoolExecutor(max_workers=8) as executor:
+                            thumbnail_results = list(
+                                executor.map(
+                                    lambda item: get_thumbnail(item[1]),
+                                    row_data
                                 )
                             )
 
-                    # インデックスを非表示化
-                    st.dataframe(
-                        results,
-                        use_container_width=True,
-                        column_config=column_config,
-                        hide_index=True
+                
+    # 検索結果をコンパクトなカードで表示
+                        for (row, video_id, link_url), thumbnail_data in zip(row_data, thumbnail_results):
+                            if thumbnail_data is not None:
+                                thumbnail = BytesIO(thumbnail_data)
+                            else:
+                                thumbnail = "thumbnail_default.jpg"
+
+                            with st.container():
+                                image_col, info_col, link_col = st.columns(
+                                    [1.15, 5.7, 1.15],
+                                    vertical_alignment="top"
+                                )
+
+                                # 左：小さめのサムネイル
+                                with image_col:
+                                    st.image(thumbnail, use_container_width=True)
+
+                                # 中央：必要な情報をコンパクトに表示
+                                with info_col:
+                                    title_col = None
+                                    for candidate in ["曲名", "配信タイトル"]:
+                                        if candidate in results.columns:
+                                            value = row[candidate]
+                                            if pd.notna(value) and str(value).strip():
+                                                title_col = candidate
+                                                break
+
+                                    if title_col:
+                                        st.markdown(f"**🎵 {row[title_col]}**")
+
+                                    # アーティスト名を日付より先に表示
+                                    if "アーティスト名" in results.columns:
+                                        value = row["アーティスト名"]
+                                        if pd.notna(value) and str(value).strip():
+                                            st.caption(f"🎤 {value}")
+
+                                    # 日付とジャンルを同じ行に表示
+                                    date_text = ""
+                                    date_cols = ["年", "月", "日"]
+                                    if all(col in results.columns for col in date_cols):
+                                        year, month, day = row["年"], row["月"], row["日"]
+                                        if all(pd.notna(v) for v in [year, month, day]):
+                                            date_text = f"📅 {int(year)}/{int(month):02d}/{int(day):02d}"
+
+                                    genre_text = ""
+                                    if "ジャンル" in results.columns:
+                                        value = row["ジャンル"]
+                                        if pd.notna(value) and str(value).strip():
+                                            genre_text = f"🏷️ {value}"
+
+                                    if date_text or genre_text:
+                                        st.caption("　　".join(part for part in [date_text, genre_text] if part))
+
+                                    # 配信タイトル
+                                    if "配信タイトル" in results.columns and title_col != "配信タイトル":
+                                        value = row["配信タイトル"]
+                                        if pd.notna(value) and str(value).strip():
+                                            st.caption(f"📺 配信タイトル：{value}")
+
+                                    # タイムスタンプ（空欄は表示しない）
+                                    timestamp_col = next(
+                                        (col for col in results.columns if "タイムスタンプ" in col or col.lower() in {"timestamp", "time_stamp"}),
+                                        None
+                                    )
+                                    if timestamp_col:
+                                        value = row[timestamp_col]
+                                        if pd.notna(value) and str(value).strip() and str(value).strip() not in {"-", "－"}:
+                                            st.caption(f"⏱ タイムスタンプ：{value}")
+
+                                # 右：小さめの視聴ボタン
+                                with link_col:
+                                    if link_url:
+                                        st.link_button(
+                                            "▶ 視聴",
+                                            link_url,
+                                            use_container_width=True
+                                        )
+
+                            st.divider()
+
+                    # 件数表示は中央揃え
+                    st.markdown(
+                        f'<div style="text-align:center;color:#9CA3AF;font-size:0.85rem;">'
+                        f'{start_idx + 1}〜{start_idx + len(page_results)}件目 / 全{len(results)}件'
+                        f'</div>',
+                        unsafe_allow_html=True
                     )
+
+                    # 件数表示の下に区切り線
+                    st.markdown(
+                        '<hr style="border:none;border-top:1px solid #303746;margin:10px 0 14px 0;">',
+                        unsafe_allow_html=True
+                    )
+
+                    # 下部ページ切替は上部と同じ配置・サイズ・形式に統一
+                    bottom_prev_col, bottom_page_col, bottom_next_col = st.columns([1, 2, 1])
+                    with bottom_prev_col:
+                        st.button(
+                            "← 前のページ",
+                            key=f"{page_key}_prev_bottom",
+                            disabled=page_num <= 1,
+                            use_container_width=True,
+                            on_click=set_search_page,
+                            args=(page_num - 1,)
+                        )
+                    with bottom_page_col:
+                        st.caption(
+                            f"ページ {page_num} / {total_pages}",
+                            text_alignment="center"
+                        )
+                    with bottom_next_col:
+                        st.button(
+                            "次のページ →",
+                            key=f"{page_key}_next_bottom",
+                            disabled=page_num >= total_pages,
+                            use_container_width=True,
+                            on_click=set_search_page,
+                            args=(page_num + 1,)
+                        )
 
                 else:
-
-                    st.warning(
-                        "該当する履歴が見つかりませんでした。"
-                    )
+                    st.warning("該当する履歴が見つかりませんでした。")
 
             else:
 
