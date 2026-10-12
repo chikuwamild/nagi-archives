@@ -427,17 +427,34 @@ css = """
             box-sizing: border-box !important;
         }
 
-        [data-testid="stLinkButton"] a,
-        [data-testid="stLinkButton"] p {
+        /* スマホの視聴ボタン：幅を抑えつつ縦に高さを出す */
+        [data-testid="stLinkButton"] a {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            box-sizing: border-box !important;
             min-width: 0 !important;
             width: 100% !important;
             max-width: 100% !important;
-            padding: 0.25rem 0.1rem !important;
+            min-height: 54px !important;
+            padding: 8px 2px !important;
             font-size: 10px !important;
-            white-space: nowrap !important;
+            line-height: 1.2 !important;
+            white-space: normal !important;
             overflow: visible !important;
             text-overflow: clip !important;
-            justify-content: center !important;
+        }
+
+        [data-testid="stLinkButton"] a p {
+            width: auto !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            font-size: 10px !important;
+            line-height: 1.2 !important;
+            white-space: normal !important;
+            overflow: visible !important;
+            text-overflow: clip !important;
         }
 
         [data-testid="stHorizontalBlock"]:has([data-testid="stImage"]) [data-testid="stImage"],
