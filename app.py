@@ -409,7 +409,7 @@ css = """
         /* 検索結果の行だけ、サムネイル・情報・視聴ボタンを横並び */
         [data-testid="stHorizontalBlock"]:has([data-testid="stImage"]) {
             display: grid !important;
-            grid-template-columns: minmax(0, 20%) minmax(0, 1fr) minmax(0, 23%) !important;
+            grid-template-columns: minmax(0, 22%) minmax(0, 1fr) minmax(0, 23%) !important;
             align-items: start !important;
             gap: 5px !important;
             width: 100% !important;
@@ -418,6 +418,7 @@ css = """
             box-sizing: border-box !important;
         }
 
+        [data-testid="stHorizontalBlock"]:has([data-testid="stImage"]) > [data-testid="stColumn"],
         [data-testid="stHorizontalBlock"]:has([data-testid="stImage"]) > [data-testid="column"] {
             min-width: 0 !important;
             width: auto !important;
@@ -428,7 +429,8 @@ css = """
         }
 
         /* スマホの視聴ボタン：幅を抑えつつ縦に高さを出す */
-        [data-testid="stLinkButton"] a {
+        [data-testid="stLinkButton"],
+        a[data-testid="stLinkButton"] {
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
@@ -437,22 +439,23 @@ css = """
             width: 100% !important;
             max-width: 100% !important;
             min-height: 54px !important;
-            padding: 8px 2px !important;
-            font-size: 10px !important;
+            padding: 8px 4px !important;
+            font-size: 11px !important;
             line-height: 1.2 !important;
-            white-space: normal !important;
+            white-space: nowrap !important;
             overflow: visible !important;
             text-overflow: clip !important;
         }
 
-        [data-testid="stLinkButton"] a p {
+        [data-testid="stLinkButton"] p,
+        a[data-testid="stLinkButton"] p {
             width: auto !important;
             max-width: 100% !important;
             margin: 0 !important;
             padding: 0 !important;
-            font-size: 10px !important;
+            font-size: 11px !important;
             line-height: 1.2 !important;
-            white-space: normal !important;
+            white-space: nowrap !important;
             overflow: visible !important;
             text-overflow: clip !important;
         }
@@ -1099,7 +1102,7 @@ if df is not None:
 
                     # 上部ページ切替（スマホでも1行に固定）
                     with st.container(key="pagination_top"):
-                        top_prev_col, top_page_col, top_next_col = st.columns([1, 1, 1])
+                        top_prev_col, top_page_col, top_next_col = st.columns([1, 0.72, 1], gap="small")
                         with top_prev_col:
                             st.button(
                                 "← 前へ",
@@ -1157,7 +1160,7 @@ if df is not None:
 
                             with st.container():
                                 image_col, info_col, link_col = st.columns(
-                                    [1.15, 5.7, 1.15],
+                                    [1.5, 4.8, 1.5],
                                     vertical_alignment="top"
                                 )
 
@@ -1244,7 +1247,7 @@ if df is not None:
 
                     # 下部ページ切替（スマホでも1行に固定）
                     with st.container(key="pagination_bottom"):
-                        bottom_prev_col, bottom_page_col, bottom_next_col = st.columns([1, 1, 1])
+                        bottom_prev_col, bottom_page_col, bottom_next_col = st.columns([1, 0.72, 1], gap="small")
                         with bottom_prev_col:
                             st.button(
                                 "← 前へ",
