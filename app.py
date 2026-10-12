@@ -305,6 +305,15 @@ css = """
         border: 1px solid #45356D !important;
     }
 
+    /* 検索結果カード：背景アイコンと区別できる背景色・枠線 */
+    [data-testid="stHorizontalBlock"]:has([data-testid="stImage"]) {
+        background: #11151F !important;
+        border: 1px solid #2A324B !important;
+        border-radius: 6px !important;
+        padding: 8px 8px 12px !important;
+        box-sizing: border-box !important;
+    }
+
     /* 検索結果内の補助情報は詰めて表示 */
     [data-testid="stVerticalBlock"] [data-testid="stCaptionContainer"] p {
         font-size: 0.78rem !important;
@@ -404,18 +413,44 @@ css = """
         .st-key-pagination_bottom [data-testid="stCaptionContainer"] {
             white-space: nowrap !important;
             text-align: center !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            height: 100% !important;
+            min-height: 42px !important;
+            padding: 0 !important;
+            margin: 0 !important;
         }
 
-        /* 検索結果の行だけ、サムネイル・情報・視聴ボタンを横並び */
+        .st-key-pagination_top [data-testid="stCaptionContainer"] p,
+        .st-key-pagination_bottom [data-testid="stCaptionContainer"] p {
+            margin: 0 !important;
+            padding: 0 !important;
+            line-height: 1.2 !important;
+        }
+
+        .st-key-pagination_top [data-testid="stColumn"]:nth-child(2),
+        .st-key-pagination_bottom [data-testid="stColumn"]:nth-child(2) {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+
+        /* 検索結果は画面幅内に収め、サムネイルと情報の2列にする */
         [data-testid="stHorizontalBlock"]:has([data-testid="stImage"]) {
             display: grid !important;
-            grid-template-columns: minmax(0, 22%) minmax(0, 1fr) minmax(0, 23%) !important;
+            grid-template-columns: minmax(0, 26%) minmax(0, 1fr) !important;
             align-items: start !important;
-            gap: 5px !important;
+            gap: 8px !important;
             width: 100% !important;
             max-width: 100% !important;
             min-width: 0 !important;
             box-sizing: border-box !important;
+            background: #11151F !important;
+            border: 1px solid #2A324B !important;
+            border-radius: 6px !important;
+            padding: 8px 8px 12px !important;
+            overflow: hidden !important;
         }
 
         [data-testid="stHorizontalBlock"]:has([data-testid="stImage"]) > [data-testid="stColumn"],
@@ -428,7 +463,13 @@ css = """
             box-sizing: border-box !important;
         }
 
-        /* スマホの視聴ボタン：幅を抑えつつ縦に高さを出す */
+        /* サムネイル列だけ間隔を詰める（文字情報の行間には影響させない） */
+        [data-testid="stColumn"]:has([data-testid="stImage"]) [data-testid="stVerticalBlock"] {
+            gap: 0.25rem !important;
+            row-gap: 0.25rem !important;
+        }
+
+        /* 視聴ボタンはサムネイル下にコンパクトに配置 */
         [data-testid="stLinkButton"],
         a[data-testid="stLinkButton"] {
             display: flex !important;
@@ -438,8 +479,8 @@ css = """
             min-width: 0 !important;
             width: 100% !important;
             max-width: 100% !important;
-            min-height: 54px !important;
-            padding: 8px 4px !important;
+            min-height: 32px !important;
+            padding: 4px 3px !important;
             font-size: 11px !important;
             line-height: 1.2 !important;
             white-space: nowrap !important;
@@ -1159,16 +1200,22 @@ if df is not None:
                                 thumbnail = "thumbnail_default.jpg"
 
                             with st.container():
-                                image_col, info_col, link_col = st.columns(
-                                    [1.5, 4.8, 1.5],
+                                image_col, info_col = st.columns(
+                                    [1.5, 5.5],
                                     vertical_alignment="top"
                                 )
 
-                                # 左：小さめのサムネイル
+                                # 左：サムネイルと、その直下に視聴ボタン
                                 with image_col:
                                     st.image(thumbnail, use_container_width=True)
+                                    if link_url:
+                                        st.link_button(
+                                            "▶ 視聴",
+                                            link_url,
+                                            use_container_width=True
+                                        )
 
-                                # 中央：必要な情報をコンパクトに表示
+                                # 右：必要な情報をコンパクトに表示
                                 with info_col:
                                     title_col = None
                                     for candidate in ["曲名", "配信タイトル"]:
@@ -1220,16 +1267,7 @@ if df is not None:
                                         if pd.notna(value) and str(value).strip() and str(value).strip() not in {"-", "－"}:
                                             st.caption(f"⏱ タイムスタンプ：{value}")
 
-                                # 右：視聴ボタン
-                                with link_col:
-                                    if link_url:
-                                        st.link_button(
-                                            "▶ 視聴",
-                                            link_url,
-                                            use_container_width=True
-                                        )
-
-                            st.divider()
+                    # カード自体に枠線を付けたため、カード間の区切り線は表示しない
 
                     # 件数表示は中央揃え
                     st.markdown(
