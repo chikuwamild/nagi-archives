@@ -365,6 +365,46 @@ css = """
     }
     
 
+    /* PC表示だけ：ページ番号と検索結果の文字欄を垂直中央に配置 */
+    @media (min-width: 601px) {
+        .st-key-pagination_top [data-testid="stColumn"]:nth-child(2),
+        .st-key-pagination_bottom [data-testid="stColumn"]:nth-child(2) {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+
+        .st-key-pagination_top [data-testid="stCaptionContainer"],
+        .st-key-pagination_bottom [data-testid="stCaptionContainer"] {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 100% !important;
+            min-height: 42px !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .st-key-pagination_top [data-testid="stCaptionContainer"] p,
+        .st-key-pagination_bottom [data-testid="stCaptionContainer"] p {
+            margin: 0 !important;
+            padding: 0 !important;
+            line-height: 1.2 !important;
+        }
+
+        /* 画像＋視聴ボタン列と、文字情報列の高さをそろえ、文字を中央寄せ */
+        [data-testid="stHorizontalBlock"]:has([data-testid="stImage"]) > [data-testid="stColumn"]:nth-child(2) {
+            display: flex !important;
+            align-items: center !important;
+            min-width: 0 !important;
+        }
+
+        [data-testid="stHorizontalBlock"]:has([data-testid="stImage"]) > [data-testid="stColumn"]:nth-child(2) > [data-testid="stVerticalBlock"] {
+            width: 100% !important;
+            justify-content: center !important;
+        }
+    }
+
     /* スマホ表示 */
     @media (max-width: 600px) {
 
