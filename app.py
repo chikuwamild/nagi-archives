@@ -719,6 +719,25 @@ css = """
         font-weight: 400 !important;
         opacity: 0.82 !important;
     }
+
+
+    /* 配信日並び替え：絵文字だけの小さいボタン */
+    .st-key-date_sort_control [data-testid="stButton"] > button {
+        width: auto !important;
+        min-width: 2.5rem !important;
+        max-width: 2.5rem !important;
+        padding: 0.35rem 0.45rem !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    .st-key-date_sort_control [data-testid="stButton"] > button p {
+        margin: 0 !important;
+        padding: 0 !important;
+        font-size: 1rem !important;
+        line-height: 1.2 !important;
+    }
 \n</style>
 """
 
@@ -1166,10 +1185,47 @@ if df is not None:
                         link_url = video_url or (valid_urls[0] if valid_urls else None)
                         return video_id, link_url
 
+                    # 配信日の並び順切替（検索条件ごとに状態を保持）
+                    page_key = f"search_page_{search_type}_{search_clean}"
+                    sort_key = f"{page_key}_date_ascending"
+                    if sort_key not in st.session_state:
+                        # 初期表示は新しい順
+                        st.session_state[sort_key] = False
+
+                    def toggle_date_sort():
+                        st.session_state[sort_key] = not st.session_state[sort_key]
+                        # 並び順を変えたら先頭ページへ戻す
+                        st.session_state[page_key] = 1
+
+                    sort_label = "新しい順" if not st.session_state[sort_key] else "古い順"
+                    # 絵文字1つの小さなボタン。押すと新しい順／古い順を切り替える
+                    with st.container(key="date_sort_control"):
+                        st.button(
+                            "🔃",
+                            key=f"{page_key}_sort_date_button",
+                            width="content",
+                            help=f"配信日の並び順：{sort_label}（クリックで切替）",
+                            on_click=toggle_date_sort
+                        )
+
+                    # 年・月・日から日付を作成して並び替え（画像取得・描画処理は変更しない）
+                    if all(col in results.columns for col in ["年", "月", "日"]):
+                        date_parts = pd.DataFrame({
+                            "year": pd.to_numeric(results["年"], errors="coerce"),
+                            "month": pd.to_numeric(results["月"], errors="coerce"),
+                            "day": pd.to_numeric(results["日"], errors="coerce"),
+                        }, index=results.index)
+                        sort_dates = pd.to_datetime(date_parts, errors="coerce")
+                        results = results.assign(_sort_date=sort_dates).sort_values(
+                            by="_sort_date",
+                            ascending=st.session_state[sort_key],
+                            na_position="last",
+                            kind="mergesort"
+                        ).drop(columns=["_sort_date"])
+
                     # 件数が多い場合に一度に描画しない（1ページ20件）
                     page_size = 20
                     total_pages = (len(results) + page_size - 1) // page_size
-                    page_key = f"search_page_{search_type}_{search_clean}"
                     if page_key not in st.session_state:
                         st.session_state[page_key] = 1
 
