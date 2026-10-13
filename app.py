@@ -5,7 +5,6 @@ import base64
 import requests
 from io import BytesIO
 from urllib.parse import urlparse, parse_qs
-from concurrent.futures import ThreadPoolExecutor
 
 # 1. ページの設定
 st.set_page_config(
@@ -1189,7 +1188,7 @@ if df is not None:
                                 "← 前へ",
                                 key=f"{page_key}_prev_top",
                                 disabled=page_num <= 1,
-                                use_container_width=True,
+                                width="stretch",
                                 on_click=set_search_page,
                                 args=(page_num - 1,)
                             )
@@ -1203,7 +1202,7 @@ if df is not None:
                                 "次へ →",
                                 key=f"{page_key}_next_top",
                                 disabled=page_num >= total_pages,
-                                use_container_width=True,
+                                width="stretch",
                                 on_click=set_search_page,
                                 args=(page_num + 1,)
                             )
@@ -1214,25 +1213,18 @@ if df is not None:
                     start_idx = (int(page_num) - 1) * page_size
                     page_results = results.iloc[start_idx:start_idx + page_size]
 
-                    # サムネイルの準備が完了してから結果一覧を描画し、初回表示の崩れを抑える
+                    # 初回表示の安定化：画像を順番に取得し、取得後にカードを描画する
                     with st.spinner("検索結果を読み込み中です… サムネイルと曲情報を準備しています"):
-                        # 表示対象のページ分だけサムネイルを取得
                         row_data = []
                         for _, row in page_results.iterrows():
                             video_id, link_url = get_row_urls(row)
                             row_data.append((row, video_id, link_url))
 
-                        # 並列取得して待ち時間を短縮
-                        with ThreadPoolExecutor(max_workers=4) as executor:
-                            thumbnail_results = list(
-                                executor.map(
-                                    lambda item: get_thumbnail(item[1]),
-                                    row_data
-                                )
-                            )
+                        # ThreadPoolExecutorを使わず、順番に取得してScriptRunContext警告を避ける
+                        thumbnail_results = []
+                        for _, video_id, _ in row_data:
+                            thumbnail_results.append(get_thumbnail(video_id))
 
-                
-    # 検索結果をコンパクトなカードで表示
                         for (row, video_id, link_url), thumbnail_data in zip(row_data, thumbnail_results):
                             if thumbnail_data is not None:
                                 thumbnail = BytesIO(thumbnail_data)
@@ -1247,12 +1239,12 @@ if df is not None:
 
                                 # 左：サムネイルと、その直下に視聴ボタン
                                 with image_col:
-                                    st.image(thumbnail, use_container_width=True)
+                                    st.image(thumbnail, width="stretch")
                                     if link_url:
                                         st.link_button(
                                             "▶ 視聴",
                                             link_url,
-                                            use_container_width=True
+                                            width="stretch"
                                         )
 
                                 # 右：必要な情報を表示
@@ -1307,7 +1299,6 @@ if df is not None:
                                         if pd.notna(value) and str(value).strip() and str(value).strip() not in {"-", "－"}:
                                             st.caption(f"⏱ タイムスタンプ：{value}")
 
-                    
                     # 件数表示中央揃え
                     st.markdown(
                         f'<div style="text-align:center;color:#9CA3AF;font-size:0.85rem;">'
@@ -1330,7 +1321,7 @@ if df is not None:
                                 "← 前へ",
                                 key=f"{page_key}_prev_bottom",
                                 disabled=page_num <= 1,
-                                use_container_width=True,
+                                width="stretch",
                                 on_click=set_search_page,
                                 args=(page_num - 1,)
                             )
@@ -1344,7 +1335,7 @@ if df is not None:
                                 "次へ →",
                                 key=f"{page_key}_next_bottom",
                                 disabled=page_num >= total_pages,
-                                use_container_width=True,
+                                width="stretch",
                                 on_click=set_search_page,
                                 args=(page_num + 1,)
                             )
