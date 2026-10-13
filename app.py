@@ -1240,6 +1240,7 @@ if df is not None:
                             "🔃",
                             key=f"{page_key}_sort_date_button",
                             width="content",
+                            help="並び替え",
                             on_click=toggle_date_sort
                         )
 
