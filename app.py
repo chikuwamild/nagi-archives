@@ -721,15 +721,31 @@ css = """
     }
 
 
-    /* 配信日並び替え：絵文字だけの小さいボタン */
+    /* 配信日並び替え：背景なしの絵文字ボタン */
     .st-key-date_sort_control [data-testid="stButton"] > button {
         width: auto !important;
-        min-width: 2.5rem !important;
-        max-width: 2.5rem !important;
-        padding: 0.35rem 0.45rem !important;
+        min-width: 2.1rem !important;
+        max-width: 2.1rem !important;
+        min-height: 2.1rem !important;
+        padding: 0.25rem !important;
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
+        background: transparent !important;
+        border: 1px solid transparent !important;
+        box-shadow: none !important;
+        color: #F8FAFC !important;
+    }
+
+    .st-key-date_sort_control [data-testid="stButton"] > button:hover {
+        background: rgba(148, 163, 184, 0.12) !important;
+        border-color: rgba(148, 163, 184, 0.25) !important;
+        box-shadow: none !important;
+    }
+
+    .st-key-date_sort_control [data-testid="stButton"] > button:active {
+        background: rgba(148, 163, 184, 0.18) !important;
+        box-shadow: none !important;
     }
 
     .st-key-date_sort_control [data-testid="stButton"] > button p {
@@ -737,6 +753,20 @@ css = """
         padding: 0 !important;
         font-size: 1rem !important;
         line-height: 1.2 !important;
+        color: #F8FAFC !important;
+    }
+
+    /* 並び替えボタンの説明ツールチップをダーク背景・明るい文字にする */
+    [data-testid="stTooltipContent"],
+    [data-baseweb="tooltip"] > div {
+        background-color: #202633 !important;
+        color: #F8FAFC !important;
+        border: 1px solid #3A455B !important;
+    }
+
+    [data-testid="stTooltipContent"] *,
+    [data-baseweb="tooltip"] * {
+        color: #F8FAFC !important;
     }
 \n</style>
 """
@@ -1360,12 +1390,6 @@ if df is not None:
                         f'<div style="text-align:center;color:#9CA3AF;font-size:0.85rem;">'
                         f'{start_idx + 1}〜{start_idx + len(page_results)}件目 / 全{len(results)}件'
                         f'</div>',
-                        unsafe_allow_html=True
-                    )
-
-                    # 件数表示の下に区切り線
-                    st.markdown(
-                        '<hr style="border:none;border-top:1px solid #303746;margin:10px 0 14px 0;">',
                         unsafe_allow_html=True
                     )
 
