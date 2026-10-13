@@ -365,7 +365,7 @@ css = """
     }
     
 
-    /* PC表示だけ：ページ番号と検索結果の文字欄を垂直中央に配置 */
+    /* PC表示：ページ番号と検索結果の文字欄を垂直中央に配置 */
     @media (min-width: 601px) {
         .st-key-pagination_top [data-testid="stColumn"]:nth-child(2),
         .st-key-pagination_bottom [data-testid="stColumn"]:nth-child(2) {
@@ -747,7 +747,7 @@ st.markdown(
 
 # 更新日
 st.markdown(
-    "<div class='update-date'>✨公認アプリ✨<br>2026年10月12日更新(TOTAL TRACKS:742)</div>",
+    "<div class='update-date'>✨公認アプリ✨<br>2026年10月12日更新<br>(TOTAL TRACKS:742)</div>",
     unsafe_allow_html=True
 )
 
@@ -814,7 +814,7 @@ def get_youtube_video_id(url):
 
 
 # YouTubeサムネイルを取得する関数
-@st.cache_data(ttl=86400)
+@st.cache_data(ttl=86400, max_entries=60)
 def get_thumbnail(video_id):
     if not video_id:
         return None
@@ -850,7 +850,7 @@ def get_thumbnail(video_id):
 
 
 # データの読み込み
-@st.cache_data
+@st.cache_data(ttl=3600, max_entries=1)
 def load_data():
     try:
         df = pd.read_excel("songs_data.xlsx")
@@ -1223,7 +1223,7 @@ if df is not None:
                             row_data.append((row, video_id, link_url))
 
                         # 並列取得して待ち時間を短縮
-                        with ThreadPoolExecutor(max_workers=8) as executor:
+                        with ThreadPoolExecutor(max_workers=4) as executor:
                             thumbnail_results = list(
                                 executor.map(
                                     lambda item: get_thumbnail(item[1]),
@@ -1255,7 +1255,7 @@ if df is not None:
                                             use_container_width=True
                                         )
 
-                                # 右：必要な情報をコンパクトに表示
+                                # 右：必要な情報を表示
                                 with info_col:
                                     title_col = None
                                     for candidate in ["曲名", "配信タイトル"]:
@@ -1268,7 +1268,7 @@ if df is not None:
                                     if title_col:
                                         st.markdown(f"**🎵 {row[title_col]}**")
 
-                                    # アーティスト名を日付より先に表示
+                                    # アーティスト名を表示
                                     if "アーティスト名" in results.columns:
                                         value = row["アーティスト名"]
                                         if pd.notna(value) and str(value).strip():
@@ -1307,9 +1307,8 @@ if df is not None:
                                         if pd.notna(value) and str(value).strip() and str(value).strip() not in {"-", "－"}:
                                             st.caption(f"⏱ タイムスタンプ：{value}")
 
-                    # カード自体に枠線を付けたため、カード間の区切り線は表示しない
-
-                    # 件数表示は中央揃え
+                    
+                    # 件数表示中央揃え
                     st.markdown(
                         f'<div style="text-align:center;color:#9CA3AF;font-size:0.85rem;">'
                         f'{start_idx + 1}〜{start_idx + len(page_results)}件目 / 全{len(results)}件'
