@@ -721,15 +721,22 @@ css = """
     }
 
 
-    /* 配信日並び替え：背景・枠線なしの小さな絵文字ボタン */
-    .st-key-date_sort_control [data-testid="stButton"] {
+    /* 配信日並び替え：通常時は完全に透明な小さな絵文字ボタン */
+    .st-key-date_sort_control,
+    .st-key-date_sort_control [data-testid="stButton"],
+    .st-key-date_sort_control [data-testid="stButton"] > div {
         width: fit-content !important;
         min-width: 0 !important;
+        background: transparent !important;
+        background-color: transparent !important;
+        box-shadow: none !important;
     }
 
-    .st-key-date_sort_control [data-testid="stButton"] > button,
-    .st-key-date_sort_control [data-testid="stButton"] > button:focus,
-    .st-key-date_sort_control [data-testid="stButton"] > button:focus:not(:active) {
+    .st-key-date_sort_control [data-testid="stButton"] button,
+    .st-key-date_sort_control [data-testid="stButton"] button[kind],
+    .st-key-date_sort_control [data-testid="stButton"] button:focus,
+    .st-key-date_sort_control [data-testid="stButton"] button:focus:not(:active),
+    .st-key-date_sort_control [data-testid="stButton"] button:not(:hover):not(:active) {
         width: 2.1rem !important;
         min-width: 2.1rem !important;
         max-width: 2.1rem !important;
@@ -750,14 +757,16 @@ css = """
         transition: background-color 0.12s ease, border-color 0.12s ease, transform 0.08s ease !important;
     }
 
-    .st-key-date_sort_control [data-testid="stButton"] > button p,
-    .st-key-date_sort_control [data-testid="stButton"] > button span {
+    .st-key-date_sort_control [data-testid="stButton"] button p,
+    .st-key-date_sort_control [data-testid="stButton"] button span {
         color: #F8FAFC !important;
         opacity: 1 !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
 
-    /* ホバー時は控えめな暗色。通常時は背景なし */
-    .st-key-date_sort_control [data-testid="stButton"] > button:hover {
+    /* ホバー時のみ薄い背景、押下時は青みのある背景と縮小で反応 */
+    .st-key-date_sort_control [data-testid="stButton"] button:hover {
         background: rgba(148, 163, 184, 0.14) !important;
         background-color: rgba(148, 163, 184, 0.14) !important;
         background-image: none !important;
@@ -765,7 +774,7 @@ css = """
         box-shadow: none !important;
     }
 
-    .st-key-date_sort_control [data-testid="stButton"] > button:active {
+    .st-key-date_sort_control [data-testid="stButton"] button:active {
         background: rgba(37, 99, 235, 0.28) !important;
         background-color: rgba(37, 99, 235, 0.28) !important;
         background-image: none !important;
@@ -1335,91 +1344,93 @@ if df is not None:
                     start_idx = (int(page_num) - 1) * page_size
                     page_results = results.iloc[start_idx:start_idx + page_size]
 
-                    # 初回表示の安定化：画像を順番に取得し、取得後にカードを描画する
-                    with st.spinner("検索結果を読み込み中です… サムネイルと曲情報を準備しています"):
-                        row_data = []
-                        for _, row in page_results.iterrows():
-                            video_id, link_url = get_row_urls(row)
-                            row_data.append((row, video_id, link_url))
+                    # 初回表示の安定化：画像取得中だけ読み込み表示を出す。
+                    # カード描画はspinnerの外でまとめて行い、スクロール中のレイアウト変化を抑える。
+                    row_data = []
+                    for _, row in page_results.iterrows():
+                        video_id, link_url = get_row_urls(row)
+                        row_data.append((row, video_id, link_url))
 
-                        # ThreadPoolExecutorを使わず、順番に取得してScriptRunContext警告を避ける
+                    with st.spinner("検索結果を読み込み中です… サムネイルと曲情報を準備しています"):
+                        # 並列処理を使わず順番に取得し、ThreadPoolExecutor由来の警告を避ける
                         thumbnail_results = []
                         for _, video_id, _ in row_data:
                             thumbnail_results.append(get_thumbnail(video_id))
 
-                        for (row, video_id, link_url), thumbnail_data in zip(row_data, thumbnail_results):
-                            if thumbnail_data is not None:
-                                thumbnail = BytesIO(thumbnail_data)
-                            else:
-                                thumbnail = "thumbnail_default.jpg"
+                    # 取得が終わってからカードを描画する
+                    for (row, video_id, link_url), thumbnail_data in zip(row_data, thumbnail_results):
+                        if thumbnail_data is not None:
+                            thumbnail = BytesIO(thumbnail_data)
+                        else:
+                            thumbnail = "thumbnail_default.jpg"
 
-                            with st.container():
-                                image_col, info_col = st.columns(
-                                    [1.5, 5.5],
-                                    vertical_alignment="top"
-                                )
+                        with st.container():
+                            image_col, info_col = st.columns(
+                                [1.5, 5.5],
+                                vertical_alignment="top"
+                            )
 
-                                # 左：サムネイルと、その直下に視聴ボタン
-                                with image_col:
-                                    st.image(thumbnail, width="stretch")
-                                    if link_url:
-                                        st.link_button(
-                                            "▶ 視聴",
-                                            link_url,
-                                            width="stretch"
-                                        )
-
-                                # 右：必要な情報を表示
-                                with info_col:
-                                    title_col = None
-                                    for candidate in ["曲名", "配信タイトル"]:
-                                        if candidate in results.columns:
-                                            value = row[candidate]
-                                            if pd.notna(value) and str(value).strip():
-                                                title_col = candidate
-                                                break
-
-                                    if title_col:
-                                        st.markdown(f"**🎵 {row[title_col]}**")
-
-                                    # アーティスト名を表示
-                                    if "アーティスト名" in results.columns:
-                                        value = row["アーティスト名"]
-                                        if pd.notna(value) and str(value).strip():
-                                            st.caption(f"🎤 {value}")
-
-                                    # 日付とジャンルを同じ行に表示
-                                    date_text = ""
-                                    date_cols = ["年", "月", "日"]
-                                    if all(col in results.columns for col in date_cols):
-                                        year, month, day = row["年"], row["月"], row["日"]
-                                        if all(pd.notna(v) for v in [year, month, day]):
-                                            date_text = f"📅 {int(year)}/{int(month):02d}/{int(day):02d}"
-
-                                    genre_text = ""
-                                    if "ジャンル" in results.columns:
-                                        value = row["ジャンル"]
-                                        if pd.notna(value) and str(value).strip():
-                                            genre_text = f"🏷️ {value}"
-
-                                    if date_text or genre_text:
-                                        st.caption("　　".join(part for part in [date_text, genre_text] if part))
-
-                                    # 配信タイトル
-                                    if "配信タイトル" in results.columns and title_col != "配信タイトル":
-                                        value = row["配信タイトル"]
-                                        if pd.notna(value) and str(value).strip():
-                                            st.caption(f"📺 配信タイトル：{value}")
-
-                                    # タイムスタンプ（空欄は表示しない）
-                                    timestamp_col = next(
-                                        (col for col in results.columns if "タイムスタンプ" in col or col.lower() in {"timestamp", "time_stamp"}),
-                                        None
+                            # 左：サムネイルと、その直下に視聴ボタン
+                            with image_col:
+                                st.image(thumbnail, width="stretch")
+                                if link_url:
+                                    st.link_button(
+                                        "▶ 視聴",
+                                        link_url,
+                                        width="stretch"
                                     )
-                                    if timestamp_col:
-                                        value = row[timestamp_col]
-                                        if pd.notna(value) and str(value).strip() and str(value).strip() not in {"-", "－"}:
-                                            st.caption(f"⏱ タイムスタンプ：{value}")
+
+                            # 右：必要な情報を表示
+                            with info_col:
+                                title_col = None
+                                for candidate in ["曲名", "配信タイトル"]:
+                                    if candidate in results.columns:
+                                        value = row[candidate]
+                                        if pd.notna(value) and str(value).strip():
+                                            title_col = candidate
+                                            break
+
+                                if title_col:
+                                    st.markdown(f"**🎵 {row[title_col]}**")
+
+                                # アーティスト名を表示
+                                if "アーティスト名" in results.columns:
+                                    value = row["アーティスト名"]
+                                    if pd.notna(value) and str(value).strip():
+                                        st.caption(f"🎤 {value}")
+
+                                # 日付とジャンルを同じ行に表示
+                                date_text = ""
+                                date_cols = ["年", "月", "日"]
+                                if all(col in results.columns for col in date_cols):
+                                    year, month, day = row["年"], row["月"], row["日"]
+                                    if all(pd.notna(v) for v in [year, month, day]):
+                                        date_text = f"📅 {int(year)}/{int(month):02d}/{int(day):02d}"
+
+                                genre_text = ""
+                                if "ジャンル" in results.columns:
+                                    value = row["ジャンル"]
+                                    if pd.notna(value) and str(value).strip():
+                                        genre_text = f"🏷️ {value}"
+
+                                if date_text or genre_text:
+                                    st.caption("　　".join(part for part in [date_text, genre_text] if part))
+
+                                # 配信タイトル
+                                if "配信タイトル" in results.columns and title_col != "配信タイトル":
+                                    value = row["配信タイトル"]
+                                    if pd.notna(value) and str(value).strip():
+                                        st.caption(f"📺 配信タイトル：{value}")
+
+                                # タイムスタンプ（空欄は表示しない）
+                                timestamp_col = next(
+                                    (col for col in results.columns if "タイムスタンプ" in col or col.lower() in {"timestamp", "time_stamp"}),
+                                    None
+                                )
+                                if timestamp_col:
+                                    value = row[timestamp_col]
+                                    if pd.notna(value) and str(value).strip() and str(value).strip() not in {"-", "－"}:
+                                        st.caption(f"⏱ タイムスタンプ：{value}")
 
                     # 件数表示中央揃え
                     st.markdown(
