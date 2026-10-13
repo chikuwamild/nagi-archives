@@ -508,7 +508,7 @@ css = """
             row-gap: 0.25rem !important;
         }
 
-        /* 視聴ボタンはサムネイル下にコンパクトに配置 */
+        /* 視聴ボタンはサムネイル下に配置 */
         [data-testid="stLinkButton"],
         a[data-testid="stLinkButton"] {
             display: flex !important;
@@ -721,7 +721,7 @@ css = """
     }
 
 
-    /* 配信日並び替え：通常時は完全に透明な小さな絵文字ボタン */
+    /* 配信日並び替え */
     .st-key-date_sort_control,
     .st-key-date_sort_control [data-testid="stButton"],
     .st-key-date_sort_control [data-testid="stButton"] > div {
@@ -841,7 +841,7 @@ st.markdown(
 
 # 更新日
 st.markdown(
-    "<div class='update-date'>✨公認アプリ✨<br>2026年10月12日更新<br>(TOTAL TRACKS:742)</div>",
+    "<div class='update-date'>✨公認アプリ✨<br>2026年10月13日更新<br>(TOTAL TRACKS:742)</div>",
     unsafe_allow_html=True
 )
 
@@ -1339,8 +1339,7 @@ if df is not None:
                                 args=(page_num + 1,)
                             )
 
-                    # 上部ページ切替と検索結果の間は、カードの枠線があるため区切り線を表示しない
-
+                    
                     start_idx = (int(page_num) - 1) * page_size
                     page_results = results.iloc[start_idx:start_idx + page_size]
 
