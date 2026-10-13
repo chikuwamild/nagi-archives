@@ -727,7 +727,9 @@ css = """
         min-width: 0 !important;
     }
 
-    .st-key-date_sort_control [data-testid="stButton"] > button {
+    .st-key-date_sort_control [data-testid="stButton"] > button,
+    .st-key-date_sort_control [data-testid="stButton"] > button:focus,
+    .st-key-date_sort_control [data-testid="stButton"] > button:focus:not(:active) {
         width: 2.1rem !important;
         min-width: 2.1rem !important;
         max-width: 2.1rem !important;
@@ -748,18 +750,47 @@ css = """
         transition: background-color 0.12s ease, border-color 0.12s ease, transform 0.08s ease !important;
     }
 
-    /* ホバー時は薄い暗色、クリック時は少し濃くして押した感覚を出す */
+    .st-key-date_sort_control [data-testid="stButton"] > button p,
+    .st-key-date_sort_control [data-testid="stButton"] > button span {
+        color: #F8FAFC !important;
+        opacity: 1 !important;
+    }
+
+    /* ホバー時は控えめな暗色。通常時は背景なし */
     .st-key-date_sort_control [data-testid="stButton"] > button:hover {
         background: rgba(148, 163, 184, 0.14) !important;
         background-color: rgba(148, 163, 184, 0.14) !important;
+        background-image: none !important;
         border-color: rgba(148, 163, 184, 0.22) !important;
+        box-shadow: none !important;
     }
 
     .st-key-date_sort_control [data-testid="stButton"] > button:active {
         background: rgba(37, 99, 235, 0.28) !important;
         background-color: rgba(37, 99, 235, 0.28) !important;
+        background-image: none !important;
         border-color: rgba(96, 165, 250, 0.5) !important;
         transform: scale(0.92) !important;
+        box-shadow: none !important;
+    }
+
+    /* ツールチップ「並び替え」を暗い背景＋白文字にして視認性を確保 */
+    [data-testid="stTooltipContent"],
+    [data-baseweb="tooltip"] > div,
+    [role="tooltip"] {
+        background-color: #202633 !important;
+        background: #202633 !important;
+        color: #FFFFFF !important;
+        border: 1px solid #3B465C !important;
+        opacity: 1 !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35) !important;
+    }
+
+    [data-testid="stTooltipContent"] *,
+    [data-baseweb="tooltip"] > div *,
+    [role="tooltip"] * {
+        color: #FFFFFF !important;
+        opacity: 1 !important;
     }
 
     .st-key-date_sort_control [data-testid="stButton"] > button:focus-visible {
