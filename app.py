@@ -508,7 +508,7 @@ css = """
             row-gap: 0.25rem !important;
         }
 
-        /* 視聴ボタンはサムネイル下にコンパクトに配置 */
+        /* 視聴ボタンはサムネイル下に配置 */
         [data-testid="stLinkButton"],
         a[data-testid="stLinkButton"] {
             display: flex !important;
@@ -721,31 +721,34 @@ css = """
     }
 
 
-    /* 配信日並び替え：背景なしの絵文字ボタン */
-    .st-key-date_sort_control [data-testid="stButton"] > button {
-        width: auto !important;
+    /* 配信日並び替え */
+    .st-key-date_sort_control [data-testid="stButton"] {
+        width: fit-content !important;
+        min-width: 0 !important;
+    }
+
+    .st-key-date_sort_control [data-testid="stButton"] > button,
+    .st-key-date_sort_control [data-testid="stButton"] > button:hover,
+    .st-key-date_sort_control [data-testid="stButton"] > button:focus,
+    .st-key-date_sort_control [data-testid="stButton"] > button:focus-visible,
+    .st-key-date_sort_control [data-testid="stButton"] > button:active {
+        width: 2.1rem !important;
         min-width: 2.1rem !important;
         max-width: 2.1rem !important;
+        height: 2.1rem !important;
         min-height: 2.1rem !important;
         padding: 0.25rem !important;
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
         background: transparent !important;
-        border: 1px solid transparent !important;
+        background-color: transparent !important;
+        background-image: none !important;
+        border: none !important;
+        outline: none !important;
         box-shadow: none !important;
         color: #F8FAFC !important;
-    }
-
-    .st-key-date_sort_control [data-testid="stButton"] > button:hover {
-        background: rgba(148, 163, 184, 0.12) !important;
-        border-color: rgba(148, 163, 184, 0.25) !important;
-        box-shadow: none !important;
-    }
-
-    .st-key-date_sort_control [data-testid="stButton"] > button:active {
-        background: rgba(148, 163, 184, 0.18) !important;
-        box-shadow: none !important;
+        transform: none !important;
     }
 
     .st-key-date_sort_control [data-testid="stButton"] > button p {
@@ -753,19 +756,6 @@ css = """
         padding: 0 !important;
         font-size: 1rem !important;
         line-height: 1.2 !important;
-        color: #F8FAFC !important;
-    }
-
-    /* 並び替えボタンの説明ツールチップをダーク背景・明るい文字にする */
-    [data-testid="stTooltipContent"],
-    [data-baseweb="tooltip"] > div {
-        background-color: #202633 !important;
-        color: #F8FAFC !important;
-        border: 1px solid #3A455B !important;
-    }
-
-    [data-testid="stTooltipContent"] *,
-    [data-baseweb="tooltip"] * {
         color: #F8FAFC !important;
     }
 \n</style>
@@ -795,7 +785,7 @@ st.markdown(
 
 # 更新日
 st.markdown(
-    "<div class='update-date'>✨公認アプリ✨<br>2026年10月12日更新<br>(TOTAL TRACKS:742)</div>",
+    "<div class='update-date'>✨公認アプリ✨<br>2026年10月13日更新<br>(TOTAL TRACKS:742)</div>",
     unsafe_allow_html=True
 )
 
@@ -933,7 +923,7 @@ if df is not None:
             ranking_df = df.copy()
 
             # 「オリ曲を含めない」にチェックが入っている場合、
-            # イザナギ・エルヴァの曲を除外
+            # ナギくんの曲を除外
             if exclude_original and "アーティスト名" in ranking_df.columns:
                 ranking_df = ranking_df[
                     ranking_df["アーティスト名"]
@@ -1098,7 +1088,7 @@ if df is not None:
         ]
 
         placeholder = (
-            "例：叫びは、Rock Mode など"
+            "例：叫び、Rock Mode など"
         )
 
 
@@ -1234,7 +1224,6 @@ if df is not None:
                             "🔃",
                             key=f"{page_key}_sort_date_button",
                             width="content",
-                            help=f"配信日の並び順：{sort_label}（クリックで切替）",
                             on_click=toggle_date_sort
                         )
 
