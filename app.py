@@ -508,7 +508,7 @@ css = """
             row-gap: 0.25rem !important;
         }
 
-        /* 視聴ボタンはサムネイル下に配置 */
+        /* 視聴ボタンはサムネイル下にコンパクトに配置 */
         [data-testid="stLinkButton"],
         a[data-testid="stLinkButton"] {
             display: flex !important;
@@ -721,17 +721,13 @@ css = """
     }
 
 
-    /* 配信日並び替え */
+    /* 配信日並び替え：背景・枠線なしの小さな絵文字ボタン */
     .st-key-date_sort_control [data-testid="stButton"] {
         width: fit-content !important;
         min-width: 0 !important;
     }
 
-    .st-key-date_sort_control [data-testid="stButton"] > button,
-    .st-key-date_sort_control [data-testid="stButton"] > button:hover,
-    .st-key-date_sort_control [data-testid="stButton"] > button:focus,
-    .st-key-date_sort_control [data-testid="stButton"] > button:focus-visible,
-    .st-key-date_sort_control [data-testid="stButton"] > button:active {
+    .st-key-date_sort_control [data-testid="stButton"] > button {
         width: 2.1rem !important;
         min-width: 2.1rem !important;
         max-width: 2.1rem !important;
@@ -744,11 +740,31 @@ css = """
         background: transparent !important;
         background-color: transparent !important;
         background-image: none !important;
-        border: none !important;
+        border: 1px solid transparent !important;
         outline: none !important;
         box-shadow: none !important;
         color: #F8FAFC !important;
-        transform: none !important;
+        transform: scale(1) !important;
+        transition: background-color 0.12s ease, border-color 0.12s ease, transform 0.08s ease !important;
+    }
+
+    /* ホバー時は薄い暗色、クリック時は少し濃くして押した感覚を出す */
+    .st-key-date_sort_control [data-testid="stButton"] > button:hover {
+        background: rgba(148, 163, 184, 0.14) !important;
+        background-color: rgba(148, 163, 184, 0.14) !important;
+        border-color: rgba(148, 163, 184, 0.22) !important;
+    }
+
+    .st-key-date_sort_control [data-testid="stButton"] > button:active {
+        background: rgba(37, 99, 235, 0.28) !important;
+        background-color: rgba(37, 99, 235, 0.28) !important;
+        border-color: rgba(96, 165, 250, 0.5) !important;
+        transform: scale(0.92) !important;
+    }
+
+    .st-key-date_sort_control [data-testid="stButton"] > button:focus-visible {
+        outline: 2px solid rgba(96, 165, 250, 0.75) !important;
+        outline-offset: 2px !important;
     }
 
     .st-key-date_sort_control [data-testid="stButton"] > button p {
@@ -785,7 +801,7 @@ st.markdown(
 
 # 更新日
 st.markdown(
-    "<div class='update-date'>✨公認アプリ✨<br>2026年10月13日更新<br>(TOTAL TRACKS:742)</div>",
+    "<div class='update-date'>✨公認アプリ✨<br>2026年10月12日更新<br>(TOTAL TRACKS:742)</div>",
     unsafe_allow_html=True
 )
 
@@ -923,7 +939,7 @@ if df is not None:
             ranking_df = df.copy()
 
             # 「オリ曲を含めない」にチェックが入っている場合、
-            # ナギくんの曲を除外
+            # イザナギ・エルヴァの曲を除外
             if exclude_original and "アーティスト名" in ranking_df.columns:
                 ranking_df = ranking_df[
                     ranking_df["アーティスト名"]
@@ -1088,7 +1104,7 @@ if df is not None:
         ]
 
         placeholder = (
-            "例：叫び、Rock Mode など"
+            "例：叫びは、Rock Mode など"
         )
 
 
@@ -1282,8 +1298,7 @@ if df is not None:
                                 args=(page_num + 1,)
                             )
 
-                    # 上部ページ切替と検索結果の間に区切り線を表示
-                    st.divider()
+                    # 上部ページ切替と検索結果の間は、カードの枠線があるため区切り線を表示しない
 
                     start_idx = (int(page_num) - 1) * page_size
                     page_results = results.iloc[start_idx:start_idx + page_size]
@@ -1379,6 +1394,12 @@ if df is not None:
                         f'<div style="text-align:center;color:#9CA3AF;font-size:0.85rem;">'
                         f'{start_idx + 1}〜{start_idx + len(page_results)}件目 / 全{len(results)}件'
                         f'</div>',
+                        unsafe_allow_html=True
+                    )
+
+                    # 件数表示と下部ページ切替の間には区切り線を表示
+                    st.markdown(
+                        '<hr style="border:none;border-top:1px solid #303746;margin:10px 0 14px 0;">',
                         unsafe_allow_html=True
                     )
 
