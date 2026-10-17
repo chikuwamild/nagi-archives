@@ -3,6 +3,7 @@ import pandas as pd
 import unicodedata
 import base64
 import requests
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from io import BytesIO
 from urllib.parse import urlparse, parse_qs
 
@@ -1308,6 +1309,8 @@ if df is not None:
                     # 上下共通のページ切替処理
                     def set_search_page(next_page):
                         st.session_state[page_key] = max(1, min(total_pages, int(next_page)))
+                        # ページ切り替えでは進捗メッセージを表示しない
+                        st.session_state["search_is_paging"] = True
 
                     page_num = max(1, min(total_pages, int(st.session_state[page_key])))
                     st.session_state[page_key] = page_num
@@ -1343,25 +1346,17 @@ if df is not None:
                     start_idx = (int(page_num) - 1) * page_size
                     page_results = results.iloc[start_idx:start_idx + page_size]
 
-                    # 初回表示の安定化：画像取得中だけ読み込み表示を出す。
-                    # カード描画はspinnerの外でまとめて行い、スクロール中のレイアウト変化を抑える。
-                    row_data = []
-                    for _, row in page_results.iterrows():
+                    # 曲情報を先に表示し、サムネイルは並列取得して差し替える。
+                    # 初回検索・ページ切り替えのどちらでも進捗を表示する。
+                    st.session_state.pop("search_is_paging", None)
+                    progress = st.progress(0, text="検索結果を表示しています…")
+                    total_rows = len(page_results)
+
+                    thumbnail_slots = []
+                    thumbnail_jobs = []
+
+                    for row_index, (_, row) in enumerate(page_results.iterrows()):
                         video_id, link_url = get_row_urls(row)
-                        row_data.append((row, video_id, link_url))
-
-                    with st.spinner("検索結果を読み込み中です… サムネイルと曲情報を準備しています"):
-                        # 並列処理を使わず順番に取得し、ThreadPoolExecutor由来の警告を避ける
-                        thumbnail_results = []
-                        for _, video_id, _ in row_data:
-                            thumbnail_results.append(get_thumbnail(video_id))
-
-                    # 取得が終わってからカードを描画する
-                    for (row, video_id, link_url), thumbnail_data in zip(row_data, thumbnail_results):
-                        if thumbnail_data is not None:
-                            thumbnail = BytesIO(thumbnail_data)
-                        else:
-                            thumbnail = "thumbnail_default.jpg"
 
                         with st.container():
                             image_col, info_col = st.columns(
@@ -1369,9 +1364,10 @@ if df is not None:
                                 vertical_alignment="top"
                             )
 
-                            # 左：サムネイルと、その直下に視聴ボタン
+                            # 左：代替画像を先に表示し、取得後に差し替える
                             with image_col:
-                                st.image(thumbnail, width="stretch")
+                                thumbnail_slot = st.empty()
+                                thumbnail_slot.image("thumbnail_default.jpg", width="stretch")
                                 if link_url:
                                     st.link_button(
                                         "▶ 視聴",
@@ -1379,7 +1375,7 @@ if df is not None:
                                         width="stretch"
                                     )
 
-                            # 右：必要な情報を表示
+                            # 右：サムネイル取得を待たずに曲情報を表示
                             with info_col:
                                 title_col = None
                                 for candidate in ["曲名", "配信タイトル"]:
@@ -1392,13 +1388,11 @@ if df is not None:
                                 if title_col:
                                     st.markdown(f"**🎵 {row[title_col]}**")
 
-                                # アーティスト名を表示
                                 if "アーティスト名" in results.columns:
                                     value = row["アーティスト名"]
                                     if pd.notna(value) and str(value).strip():
                                         st.caption(f"🎤 {value}")
 
-                                # 日付とジャンルを同じ行に表示
                                 date_text = ""
                                 date_cols = ["年", "月", "日"]
                                 if all(col in results.columns for col in date_cols):
@@ -1415,13 +1409,11 @@ if df is not None:
                                 if date_text or genre_text:
                                     st.caption("　　".join(part for part in [date_text, genre_text] if part))
 
-                                # 配信タイトル
                                 if "配信タイトル" in results.columns and title_col != "配信タイトル":
                                     value = row["配信タイトル"]
                                     if pd.notna(value) and str(value).strip():
                                         st.caption(f"📺 配信タイトル：{value}")
 
-                                # タイムスタンプ（空欄は表示しない）
                                 timestamp_col = next(
                                     (col for col in results.columns if "タイムスタンプ" in col or col.lower() in {"timestamp", "time_stamp"}),
                                     None
@@ -1430,6 +1422,42 @@ if df is not None:
                                     value = row[timestamp_col]
                                     if pd.notna(value) and str(value).strip() and str(value).strip() not in {"-", "－"}:
                                         st.caption(f"⏱ タイムスタンプ：{value}")
+
+                        thumbnail_slots.append((thumbnail_slot, video_id))
+                        if video_id:
+                            thumbnail_jobs.append((thumbnail_slot, video_id))
+                        # まず曲情報の描画状況を進捗に反映（全体の30%まで）
+                        progress.progress(
+                            0.3 * (row_index + 1) / max(total_rows, 1),
+                            text=f"検索結果を表示しています… ({row_index + 1}/{total_rows}件)"
+                        )
+
+                    # サムネイルはキャッシュを活用しつつ最大12件を並列取得
+                    if thumbnail_jobs:
+                        completed = 0
+                        with ThreadPoolExecutor(max_workers=12) as executor:
+                            future_to_slot = {
+                                executor.submit(get_thumbnail, video_id): slot
+                                for slot, video_id in thumbnail_jobs
+                            }
+                            for future in as_completed(future_to_slot):
+                                slot = future_to_slot[future]
+                                try:
+                                    thumbnail_data = future.result()
+                                    if thumbnail_data is not None:
+                                        slot.image(BytesIO(thumbnail_data), width="stretch")
+                                except Exception:
+                                    pass
+                                completed += 1
+                                # 進捗表示の更新回数を抑え、画面更新の負担を軽減
+                                if completed == len(thumbnail_jobs) or completed % 3 == 0:
+                                    progress.progress(
+                                        0.3 + 0.7 * completed / len(thumbnail_jobs),
+                                        text=f"検索結果を表示しています… サムネイル ({completed}/{len(thumbnail_jobs)}件)"
+                                    )
+
+                    progress.progress(1.0, text="表示完了")
+                    progress.empty()
 
                     # 件数表示中央揃え
                     st.markdown(
