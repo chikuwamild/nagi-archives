@@ -305,10 +305,19 @@ css = """
         margin: 0 !important;
     }
 
-    [data-testid="stForm"] button[kind="secondaryFormSubmit"]:not(:first-child) {
+    /* 2列目のClearボタンだけ別色にする */
+    [data-testid="stForm"] [data-testid="stHorizontalBlock"] > [data-testid="stColumn"]:nth-child(2) button[kind="secondaryFormSubmit"] {
         background: #252B38 !important;
+        color: #E5E7EB !important;
+        border: 1px solid #4B5563 !important;
         box-shadow: none !important;
         letter-spacing: 0 !important;
+    }
+
+    [data-testid="stForm"] [data-testid="stHorizontalBlock"] > [data-testid="stColumn"]:nth-child(2) button[kind="secondaryFormSubmit"]:hover {
+        background: #374151 !important;
+        border-color: #6B7280 !important;
+        box-shadow: none !important;
     }
 
     /* 視聴リンクボタン */
@@ -700,7 +709,7 @@ css = """
         font-size: 0.9rem;
     }
 
-    /* TOP10の結果・タイトル */
+    /* TOP10の結果・アーカイブ検索タイトル */
     [data-testid="stExpander"] [data-testid="stMarkdownContainer"] p {
         font-size: 0.85rem !important;
     }
@@ -1278,7 +1287,7 @@ if df is not None:
             )
         with clear_col:
             clear_button = st.form_submit_button(
-                "🆑 Clear",
+                "Clear",
                 on_click=clear_search_word,
                 width="content"
             )
