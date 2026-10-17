@@ -815,7 +815,76 @@ css = """
         line-height: 1.2 !important;
         color: #F8FAFC !important;
     }
-\n</style>
+
+
+    /* ランキング行のレイアウトを安定化 */
+    .ranking-item {
+        display: grid !important;
+        grid-template-columns: 42px minmax(0, 1fr) auto !important;
+        align-items: center !important;
+        column-gap: 12px !important;
+        box-sizing: border-box !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        line-height: 1.4 !important;
+        overflow: visible !important;
+    }
+
+    .ranking-item .ranking-rank {
+        display: block !important;
+        box-sizing: border-box !important;
+        width: auto !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+        line-height: 1.35 !important;
+        align-self: center !important;
+    }
+
+    .ranking-item .ranking-name {
+        display: block !important;
+        box-sizing: border-box !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+        line-height: 1.4 !important;
+        overflow-wrap: anywhere !important;
+        word-break: normal !important;
+    }
+
+    .ranking-item .ranking-name .ranking-artist {
+        display: block !important;
+        margin-top: 3px !important;
+        line-height: 1.3 !important;
+        overflow-wrap: anywhere !important;
+    }
+
+    .ranking-item .ranking-count {
+        display: block !important;
+        box-sizing: border-box !important;
+        min-width: max-content !important;
+        margin: 0 !important;
+        line-height: 1.35 !important;
+        white-space: nowrap !important;
+        align-self: center !important;
+    }
+
+    @media (max-width: 600px) {
+        .ranking-item {
+            grid-template-columns: 34px minmax(0, 1fr) auto !important;
+            column-gap: 8px !important;
+            padding: 9px 10px !important;
+        }
+
+        .ranking-item .ranking-rank {
+            font-size: 16px !important;
+        }
+
+        .ranking-item .ranking-name,
+        .ranking-item .ranking-count {
+            font-size: 14px !important;
+        }
+    }
+
+</style>
 """
 
 # CSS内のICON_BASE64を実際の画像データに置き換える
@@ -1039,10 +1108,10 @@ if df is not None:
                     st.write("ランキングデータがありません。")
 
             else:
-                st.error("Excelに「アーティスト名」列がありません。")
+                st.error("DBに「アーティスト名」列がありません。")
 
         else:
-            st.error("Excelに「曲名」列がありません。")
+            st.error("DBに「曲名」列がありません。")
 
     # 歌ったアーティスト TOP10
     with st.expander("🎤 歌ったアーティスト TOP10"):
@@ -1135,7 +1204,7 @@ if df is not None:
         ]
 
         placeholder = (
-            "例：光、イザナギ、2026、リレー など"
+            "例：光、2026、オリ曲、リレー など"
         )
 
     else:
@@ -1346,17 +1415,43 @@ if df is not None:
                     start_idx = (int(page_num) - 1) * page_size
                     page_results = results.iloc[start_idx:start_idx + page_size]
 
-                    # 曲情報を先に表示し、サムネイルは並列取得して差し替える。
-                    # 初回検索・ページ切り替えのどちらでも進捗を表示する。
-                    st.session_state.pop("search_is_paging", None)
-                    progress = st.progress(0, text="検索結果を表示しています…")
-                    total_rows = len(page_results)
-
-                    thumbnail_slots = []
-                    thumbnail_jobs = []
+                    # サムネイルを先に並列取得し、結果カードを一度に描画する。
+                    # 代替画像から本画像への差し替えや進捗更新によるレイアウト変動を避ける。
+                    row_items = []
+                    thumbnail_jobs = {}
 
                     for row_index, (_, row) in enumerate(page_results.iterrows()):
                         video_id, link_url = get_row_urls(row)
+                        item = {
+                            "row": row,
+                            "video_id": video_id,
+                            "link_url": link_url,
+                            "thumbnail_data": None,
+                        }
+                        row_items.append(item)
+                        if video_id:
+                            thumbnail_jobs[video_id] = None
+
+                    # 同じ動画IDは一度だけ取得し、最大12件を並列処理
+                    if thumbnail_jobs:
+                        with ThreadPoolExecutor(max_workers=12) as executor:
+                            future_to_id = {
+                                executor.submit(get_thumbnail, video_id): video_id
+                                for video_id in thumbnail_jobs
+                            }
+                            for future in as_completed(future_to_id):
+                                video_id = future_to_id[future]
+                                try:
+                                    thumbnail_jobs[video_id] = future.result()
+                                except Exception:
+                                    thumbnail_jobs[video_id] = None
+
+                    # 画像取得後にカードを描画し、描画中の差し替えをなくす
+                    for item in row_items:
+                        row = item["row"]
+                        video_id = item["video_id"]
+                        link_url = item["link_url"]
+                        thumbnail_data = thumbnail_jobs.get(video_id) if video_id else None
 
                         with st.container():
                             image_col, info_col = st.columns(
@@ -1364,10 +1459,11 @@ if df is not None:
                                 vertical_alignment="top"
                             )
 
-                            # 左：代替画像を先に表示し、取得後に差し替える
                             with image_col:
-                                thumbnail_slot = st.empty()
-                                thumbnail_slot.image("thumbnail_default.jpg", width="stretch")
+                                if thumbnail_data is not None:
+                                    st.image(BytesIO(thumbnail_data), width="stretch")
+                                else:
+                                    st.image("thumbnail_default.jpg", width="stretch")
                                 if link_url:
                                     st.link_button(
                                         "▶ 視聴",
@@ -1375,7 +1471,6 @@ if df is not None:
                                         width="stretch"
                                     )
 
-                            # 右：サムネイル取得を待たずに曲情報を表示
                             with info_col:
                                 title_col = None
                                 for candidate in ["曲名", "配信タイトル"]:
@@ -1422,42 +1517,6 @@ if df is not None:
                                     value = row[timestamp_col]
                                     if pd.notna(value) and str(value).strip() and str(value).strip() not in {"-", "－"}:
                                         st.caption(f"⏱ タイムスタンプ：{value}")
-
-                        thumbnail_slots.append((thumbnail_slot, video_id))
-                        if video_id:
-                            thumbnail_jobs.append((thumbnail_slot, video_id))
-                        # まず曲情報の描画状況を進捗に反映（全体の30%まで）
-                        progress.progress(
-                            0.3 * (row_index + 1) / max(total_rows, 1),
-                            text=f"検索結果を表示しています… ({row_index + 1}/{total_rows}件)"
-                        )
-
-                    # サムネイルはキャッシュを活用しつつ最大12件を並列取得
-                    if thumbnail_jobs:
-                        completed = 0
-                        with ThreadPoolExecutor(max_workers=12) as executor:
-                            future_to_slot = {
-                                executor.submit(get_thumbnail, video_id): slot
-                                for slot, video_id in thumbnail_jobs
-                            }
-                            for future in as_completed(future_to_slot):
-                                slot = future_to_slot[future]
-                                try:
-                                    thumbnail_data = future.result()
-                                    if thumbnail_data is not None:
-                                        slot.image(BytesIO(thumbnail_data), width="stretch")
-                                except Exception:
-                                    pass
-                                completed += 1
-                                # 進捗表示の更新回数を抑え、画面更新の負担を軽減
-                                if completed == len(thumbnail_jobs) or completed % 3 == 0:
-                                    progress.progress(
-                                        0.3 + 0.7 * completed / len(thumbnail_jobs),
-                                        text=f"検索結果を表示しています… サムネイル ({completed}/{len(thumbnail_jobs)}件)"
-                                    )
-
-                    progress.progress(1.0, text="表示完了")
-                    progress.empty()
 
                     # 件数表示中央揃え
                     st.markdown(
