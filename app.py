@@ -305,19 +305,21 @@ css = """
         margin: 0 !important;
     }
 
-    /* 2列目のClearボタンだけ別色にする */
-    [data-testid="stForm"] [data-testid="stHorizontalBlock"] > [data-testid="stColumn"]:nth-child(2) button[kind="secondaryFormSubmit"] {
-        background: #252B38 !important;
-        color: #E5E7EB !important;
-        border: 1px solid #4B5563 !important;
-        box-shadow: none !important;
+    /* Clearボタン色 */
+    [data-testid="stForm"] [data-testid="stHorizontalBlock"] > [data-testid="stColumn"]:nth-child(2) button[kind="secondaryFormSubmit"],
+    [data-testid="stForm"] [data-testid="stColumn"]:nth-child(2) button[kind="secondaryFormSubmit"] {
+        background: linear-gradient(135deg, #1E40AF 0%, #38BDF8 100%) !important;
+        color: #FFFFFF !important;
+        border: none !important;
+        box-shadow: 0 0 10px rgba(56, 189, 248, 0.22) !important;
         letter-spacing: 0 !important;
     }
 
-    [data-testid="stForm"] [data-testid="stHorizontalBlock"] > [data-testid="stColumn"]:nth-child(2) button[kind="secondaryFormSubmit"]:hover {
-        background: #374151 !important;
-        border-color: #6B7280 !important;
-        box-shadow: none !important;
+    [data-testid="stForm"] [data-testid="stHorizontalBlock"] > [data-testid="stColumn"]:nth-child(2) button[kind="secondaryFormSubmit"]:hover,
+    [data-testid="stForm"] [data-testid="stColumn"]:nth-child(2) button[kind="secondaryFormSubmit"]:hover {
+        background: linear-gradient(135deg, #2563EB 0%, #7DD3FC 100%) !important;
+        border: none !important;
+        box-shadow: 0 0 16px rgba(56, 189, 248, 0.38) !important;
     }
 
     /* 視聴リンクボタン */
