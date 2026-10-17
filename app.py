@@ -262,14 +262,16 @@ css = """
         color: #FFFFFF !important;
         border: none !important;
         border-radius: 4px !important;
-        padding: 10px 40px !important;
+        padding: 7px 14px !important;
         font-weight: 900 !important;
-        font-size: 16px !important;
-        letter-spacing: 2px !important;
+        font-size: 14px !important;
+        letter-spacing: 1px !important;
+        width: fit-content !important;
+        min-width: 0 !important;
         transition: all 0.25s ease-in-out !important;
         box-shadow: 0 0 15px rgba(255, 20, 147, 0.3) !important;
-        display: block;
-        margin: 0 auto;
+        display: inline-flex !important;
+        margin: 0 !important;
         text-transform: uppercase;
     }
 
@@ -279,6 +281,34 @@ css = """
             0 0 25px rgba(255, 20, 147, 0.7),
             0 0 12px rgba(37, 99, 235, 0.6) !important;
         cursor: pointer;
+    }
+
+    /* 検索フォームのボタンを左寄せ・コンパクトに配置 */
+    [data-testid="stForm"] [data-testid="stHorizontalBlock"] {
+        width: fit-content !important;
+        max-width: 100% !important;
+        gap: 8px !important;
+        justify-content: flex-start !important;
+        align-items: center !important;
+    }
+
+    [data-testid="stForm"] [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
+        width: fit-content !important;
+        flex: 0 0 auto !important;
+        min-width: 0 !important;
+    }
+
+    [data-testid="stForm"] button[kind="secondaryFormSubmit"] {
+        width: fit-content !important;
+        min-width: 0 !important;
+        padding: 7px 14px !important;
+        margin: 0 !important;
+    }
+
+    [data-testid="stForm"] button[kind="secondaryFormSubmit"]:not(:first-child) {
+        background: #252B38 !important;
+        box-shadow: none !important;
+        letter-spacing: 0 !important;
     }
 
     /* 視聴リンクボタン */
@@ -670,7 +700,7 @@ css = """
         font-size: 0.9rem;
     }
 
-    /* TOP10の結果・アーカイブ検索タイトル */
+    /* TOP10の結果・タイトル */
     [data-testid="stExpander"] [data-testid="stMarkdownContainer"] p {
         font-size: 0.85rem !important;
     }
@@ -1225,6 +1255,10 @@ if df is not None:
     # 🔍 検索フォーム
     # ========================================
 
+    # Clearボタンのコールバック：検索ワードを空にする
+    def clear_search_word():
+        st.session_state["search_word"] = ""
+
     with st.form(
         "search_form",
         clear_on_submit=False
@@ -1232,17 +1266,22 @@ if df is not None:
 
         search_word = st.text_input(
             "🎵 検索ワードを入力してください(部分検索可)",
-            placeholder=placeholder
+            placeholder=placeholder,
+            key="search_word"
         )
 
-        st.markdown(
-            "<br>",
-            unsafe_allow_html=True
-        )
-
-        search_button = st.form_submit_button(
-            "🔍 SEARCH 👇"
-        )
+        search_col, clear_col = st.columns([0.01, 0.01], gap="small")
+        with search_col:
+            search_button = st.form_submit_button(
+                "🔍 SEARCH 👇",
+                width="content"
+            )
+        with clear_col:
+            clear_button = st.form_submit_button(
+                "🆑 Clear",
+                on_click=clear_search_word,
+                width="content"
+            )
 
 
     # ========================================
