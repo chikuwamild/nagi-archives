@@ -66,9 +66,9 @@ css = """
    ======================================== */
 .stApp::after {
     content: "";
-    position: fixed;
+    position: absolute;
     right: -40px;
-    bottom: -40px;
+    bottom: 0;
     width: 420px;
     height: 420px;
 
@@ -347,12 +347,27 @@ css = """
     }
 
     /* 検索結果カード：背景アイコンと区別できる背景色・枠線 */
-    [data-testid="stHorizontalBlock"]:has([data-testid="stImage"]) {
+    [class*="st-key-result_card_"] {
         background: #11151F !important;
         border: 1px solid #2A324B !important;
         border-radius: 6px !important;
         padding: 8px 8px 12px !important;
+        margin-bottom: 10px !important;
         box-sizing: border-box !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    [class*="st-key-result_card_"] [data-testid="stHorizontalBlock"] {
+        background: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        align-items: flex-start !important;
     }
 
     /* 検索結果内の補助情報は詰めて表示 */
@@ -434,15 +449,15 @@ css = """
         }
 
         /* 画像＋視聴ボタン列と、文字情報列の高さをそろえ、文字を中央寄せ */
-        [data-testid="stHorizontalBlock"]:has([data-testid="stImage"]) > [data-testid="stColumn"]:nth-child(2) {
-            display: flex !important;
-            align-items: center !important;
+        [class*="st-key-result_card_"] [data-testid="stHorizontalBlock"] > [data-testid="stColumn"]:nth-child(2) {
+            display: block !important;
+            align-self: start !important;
             min-width: 0 !important;
         }
 
-        [data-testid="stHorizontalBlock"]:has([data-testid="stImage"]) > [data-testid="stColumn"]:nth-child(2) > [data-testid="stVerticalBlock"] {
+        [class*="st-key-result_card_"] [data-testid="stHorizontalBlock"] > [data-testid="stColumn"]:nth-child(2) > [data-testid="stVerticalBlock"] {
             width: 100% !important;
-            justify-content: center !important;
+            justify-content: flex-start !important;
         }
     }
 
@@ -518,7 +533,7 @@ css = """
         }
 
         /* 検索結果は画面幅内に収め、サムネイルと情報の2列にする */
-        [data-testid="stHorizontalBlock"]:has([data-testid="stImage"]) {
+        [class*="st-key-result_card_"] [data-testid="stHorizontalBlock"] {
             display: grid !important;
             grid-template-columns: minmax(0, 26%) minmax(0, 1fr) !important;
             align-items: start !important;
@@ -527,15 +542,15 @@ css = """
             max-width: 100% !important;
             min-width: 0 !important;
             box-sizing: border-box !important;
-            background: #11151F !important;
-            border: 1px solid #2A324B !important;
-            border-radius: 6px !important;
-            padding: 8px 8px 12px !important;
-            overflow: hidden !important;
+            background: transparent !important;
+            border: none !important;
+            border-radius: 0 !important;
+            padding: 0 !important;
+            overflow: visible !important;
         }
 
-        [data-testid="stHorizontalBlock"]:has([data-testid="stImage"]) > [data-testid="stColumn"],
-        [data-testid="stHorizontalBlock"]:has([data-testid="stImage"]) > [data-testid="column"] {
+        [class*="st-key-result_card_"] [data-testid="stHorizontalBlock"] > [data-testid="stColumn"],
+        [class*="st-key-result_card_"] [data-testid="stHorizontalBlock"] > [data-testid="column"] {
             min-width: 0 !important;
             width: auto !important;
             max-width: 100% !important;
@@ -582,8 +597,8 @@ css = """
             text-overflow: clip !important;
         }
 
-        [data-testid="stHorizontalBlock"]:has([data-testid="stImage"]) [data-testid="stImage"],
-        [data-testid="stHorizontalBlock"]:has([data-testid="stImage"]) [data-testid="stImage"] img {
+        [class*="st-key-result_card_"] [data-testid="stHorizontalBlock"] [data-testid="stImage"],
+        [class*="st-key-result_card_"] [data-testid="stHorizontalBlock"] [data-testid="stImage"] img {
             display: block !important;
             width: 100% !important;
             max-width: 100% !important;
@@ -1497,13 +1512,13 @@ if df is not None:
                                     thumbnail_jobs[video_id] = None
 
                     # 画像取得後にカードを描画し、描画中の差し替えをなくす
-                    for item in row_items:
+                    for card_index, item in enumerate(row_items):
                         row = item["row"]
                         video_id = item["video_id"]
                         link_url = item["link_url"]
                         thumbnail_data = thumbnail_jobs.get(video_id) if video_id else None
 
-                        with st.container():
+                        with st.container(key=f"result_card_{card_index}"):
                             image_col, info_col = st.columns(
                                 [1.5, 5.5],
                                 vertical_alignment="top"
