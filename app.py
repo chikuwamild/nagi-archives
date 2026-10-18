@@ -1497,19 +1497,15 @@ if df is not None:
                         if video_id:
                             thumbnail_jobs[video_id] = None
 
-                    # 同じ動画IDは一度だけ取得し、最大12件を並列処理
-                    if thumbnail_jobs:
-                        with ThreadPoolExecutor(max_workers=12) as executor:
-                            future_to_id = {
-                                executor.submit(get_thumbnail, video_id): video_id
-                                for video_id in thumbnail_jobs
-                            }
-                            for future in as_completed(future_to_id):
-                                video_id = future_to_id[future]
-                                try:
-                                    thumbnail_jobs[video_id] = future.result()
-                                except Exception:
-                                    thumbnail_jobs[video_id] = None
+                    # 【原因切り分け用】サムネイル取得を並列ではなく順番に実行する。
+                    # Streamlitのキャッシュ関数をワーカースレッドから呼ぶ処理を避け、
+                    # レイアウト崩れが並列取得に関係するか確認する。
+                    # 同じ動画IDは一度だけ取得する。
+                    for video_id in thumbnail_jobs:
+                        try:
+                            thumbnail_jobs[video_id] = get_thumbnail(video_id)
+                        except Exception:
+                            thumbnail_jobs[video_id] = None
 
                     # 画像取得後にカードを描画し、描画中の差し替えをなくす
                     for card_index, item in enumerate(row_items):
