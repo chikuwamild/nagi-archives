@@ -3,3 +3,6 @@ base = "dark"
 backgroundColor = "#0B0D12"
 secondaryBackgroundColor = "#131722"
 textColor = "#E0E0E0"
+
+[server]
+fileWatcherType = "poll"
