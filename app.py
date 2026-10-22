@@ -1424,25 +1424,15 @@ if df is not None:
                         st.session_state[page_key] = 1
 
                     sort_label = "新しい順" if not st.session_state[sort_key] else "古い順"
-                    # 並び替えボタンと再表示ボタン
+                    # 並び替えボタン
                     with st.container(key="date_sort_control"):
-                        sort_col, reload_col = st.columns([1, 1], gap="small")
-                        with sort_col:
-                            st.button(
-                                "🔃 SORT",
-                                key=f"{page_key}_sort_date_button",
-                                width="content",
-                                help="新しい順／古い順を切り替え",
-                                on_click=toggle_date_sort
-                            )
-                        with reload_col:
-                            if st.button(
-                                "↻ RELOAD",
-                                key=f"{page_key}_reload_button",
-                                width="content",
-                                help="画面を再表示します"
-                            ):
-                                st.rerun()
+                        st.button(
+                            "🔃 SORT",
+                            key=f"{page_key}_sort_date_button",
+                            width="content",
+                            help="新しい順／古い順を切り替え",
+                            on_click=toggle_date_sort
+                        )
 
                     # 年・月・日から日付を作成して並び替え（画像取得・描画処理は変更しない）
                     if all(col in results.columns for col in ["年", "月", "日"]):
