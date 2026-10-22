@@ -802,12 +802,14 @@ css = """
     .st-key-date_sort_control [data-testid="stButton"] button:focus,
     .st-key-date_sort_control [data-testid="stButton"] button:focus:not(:active),
     .st-key-date_sort_control [data-testid="stButton"] button:not(:hover):not(:active) {
-        width: 2.1rem !important;
-        min-width: 2.1rem !important;
-        max-width: 2.1rem !important;
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
         height: 2.1rem !important;
         min-height: 2.1rem !important;
-        padding: 0.25rem !important;
+        padding: 0.25rem 0.55rem !important;
+        font-size: 0.75rem !important;
+        white-space: nowrap !important;
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
@@ -1422,15 +1424,25 @@ if df is not None:
                         st.session_state[page_key] = 1
 
                     sort_label = "新しい順" if not st.session_state[sort_key] else "古い順"
-                    # 絵文字1つの小さなボタン。押すと新しい順／古い順を切り替える
+                    # 並び替えボタンと再表示ボタン
                     with st.container(key="date_sort_control"):
-                        st.button(
-                            "🔃",
-                            key=f"{page_key}_sort_date_button",
-                            width="content",
-                            help="並び替え",
-                            on_click=toggle_date_sort
-                        )
+                        sort_col, reload_col = st.columns([1, 1], gap="small")
+                        with sort_col:
+                            st.button(
+                                "🔃 SORT",
+                                key=f"{page_key}_sort_date_button",
+                                width="content",
+                                help="新しい順／古い順を切り替え",
+                                on_click=toggle_date_sort
+                            )
+                        with reload_col:
+                            if st.button(
+                                "↻ RELOAD",
+                                key=f"{page_key}_reload_button",
+                                width="content",
+                                help="画面を再表示します"
+                            ):
+                                st.rerun()
 
                     # 年・月・日から日付を作成して並び替え（画像取得・描画処理は変更しない）
                     if all(col in results.columns for col in ["年", "月", "日"]):
