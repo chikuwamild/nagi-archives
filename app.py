@@ -346,6 +346,14 @@ css = """
         border: 1px solid #45356D !important;
     }
 
+    /* 検索結果の表示に関する控えめな案内 */
+    .layout-note {
+        color: #8892B0 !important;
+        font-size: 0.72rem !important;
+        line-height: 1.4 !important;
+        margin: 0.2rem 0 0.6rem !important;
+    }
+
     /* 検索結果カード：背景アイコンと区別できる背景色・枠線 */
     [class*="st-key-result_card_"] {
         background: #11151F !important;
@@ -1358,6 +1366,11 @@ if df is not None:
                 if not results.empty:
                     st.success(
                         f"🔥 {len(results)} 件の履歴が見つかりました！"
+                    )
+
+                    st.markdown(
+                        '<div class="layout-note">※ 表示が乱れた場合は、ページをリロードすると改善することがあります。</div>',
+                        unsafe_allow_html=True
                     )
 
                     # URL列を判定
