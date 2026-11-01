@@ -1434,7 +1434,7 @@ if df is not None:
                             on_click=toggle_date_sort
                         )
 
-                    # 年・月・日から日付を作成して並び替え（画像取得・描画処理は変更しない）
+                    # 年・月・日、Noの順に並び替え
                     if all(col in results.columns for col in ["年", "月", "日"]):
                         date_parts = pd.DataFrame({
                             "year": pd.to_numeric(results["年"], errors="coerce"),
@@ -1442,12 +1442,43 @@ if df is not None:
                             "day": pd.to_numeric(results["日"], errors="coerce"),
                         }, index=results.index)
                         sort_dates = pd.to_datetime(date_parts, errors="coerce")
-                        results = results.assign(_sort_date=sort_dates).sort_values(
-                            by="_sort_date",
-                            ascending=st.session_state[sort_key],
-                            na_position="last",
-                            kind="mergesort"
-                        ).drop(columns=["_sort_date"])
+
+                        sort_data = results.assign(
+                            _sort_date=sort_dates,
+                            _sort_original_order=range(len(results))
+                        )
+
+                        if "No" in sort_data.columns:
+                            sort_data["_sort_no"] = pd.to_numeric(
+                                sort_data["No"], errors="coerce"
+                            )
+                            sort_data = sort_data.sort_values(
+                                by=["_sort_date", "_sort_no", "_sort_original_order"],
+                                ascending=[
+                                    st.session_state[sort_key],
+                                    False,
+                                    True
+                                ],
+                                na_position="last"
+                            )
+                        else:
+                            # No列がない場合は従来どおり配信日だけで並び替え
+                            sort_data = sort_data.sort_values(
+                                by=["_sort_date", "_sort_original_order"],
+                                ascending=[st.session_state[sort_key], True],
+                                na_position="last"
+                            )
+
+                        results = sort_data.drop(
+                            columns=[
+                                col for col in [
+                                    "_sort_date",
+                                    "_sort_no",
+                                    "_sort_original_order"
+                                ]
+                                if col in sort_data.columns
+                            ]
+                        )
 
                     # 件数が多い場合に一度に描画しない（1ページ20件）
                     page_size = 20
@@ -1512,9 +1543,7 @@ if df is not None:
                         if video_id:
                             thumbnail_jobs[video_id] = None
 
-                    # 【原因切り分け用】サムネイル取得を並列ではなく順番に実行する。
-                    # Streamlitのキャッシュ関数をワーカースレッドから呼ぶ処理を避け、
-                    # レイアウト崩れが並列取得に関係するか確認する。
+                    # サムネイル取得を並列ではなく順番に実行する。
                     # 同じ動画IDは一度だけ取得する。
                     for video_id in thumbnail_jobs:
                         try:
